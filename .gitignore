@@ -1,0 +1,21 @@
+
+Square-L/Square-L.sdf
+Square-L/ipch
+Square-L/packages
+Square-L/Square-L.v11.suo
+
+Square-L/ARM
+Square-L/Debug
+Square-L/Release
+
+Square-L/Square-L/Bin
+Square-L/Square-L/obj
+Square-L/Square-L/Square-L.csproj.user
+
+Square-L/Crypto/ARM
+Square-L/Crypto/Debug
+Square-L/Crypto/Release
+Square-L/Crypto/Generated\ Files
+Square-L/Crypto/Crypto.vcxproj.filters
+Square-L/Crypto/Crypto.vcxproj.user
+

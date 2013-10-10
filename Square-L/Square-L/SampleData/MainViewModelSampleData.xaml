@@ -1,0 +1,16 @@
+﻿<local:MainViewModel 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"       
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Square_L" 
+    SampleProperty="Sample Text Property Value">
+    
+    <local:MainViewModel.Identities>
+        <local:IdentityViewModel Nickname="identity one"/>
+        <local:IdentityViewModel Nickname="identity two"/>
+        <local:IdentityViewModel Nickname="identity three"/>
+        <local:IdentityViewModel Nickname="identity four"/>
+        <local:IdentityViewModel Nickname="identity five"/>
+        <local:IdentityViewModel Nickname="identity six"/>
+    </local:MainViewModel.Identities>
+    
+</local:MainViewModel>
