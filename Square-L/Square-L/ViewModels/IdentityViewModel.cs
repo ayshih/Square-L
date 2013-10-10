@@ -37,6 +37,10 @@ namespace Square_L
         }
 
         private DateTime _lastUsed;
+        /// <summary>
+        /// The last time an identity was used as a DateTime object
+        /// </summary>
+        /// <returns></returns>
         public DateTime LastUsed
         {
             get { return _lastUsed; }
@@ -50,6 +54,10 @@ namespace Square_L
             }
         }
 
+        /// <summary>
+        /// The last time an identity was used as a string, prepended with "Last used: "
+        /// </summary>
+        /// <returns></returns>
         public string LastUsedString
         {
             get { return "Last used: " + _lastUsed.ToString(); }

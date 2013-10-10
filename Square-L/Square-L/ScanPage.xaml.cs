@@ -141,6 +141,10 @@ namespace Square_L
             }
         }
 
+        /// <summary>
+        /// Rearranges the elements on the page depending on the page orientation
+        /// </summary>
+        /// <param name="orientation">page orientation</param>
         private void SetLayout(PageOrientation orientation)
         {
             switch (orientation & PageOrientation.Landscape)
@@ -188,12 +192,22 @@ namespace Square_L
             SetPreviewRotation(e.Orientation);
         }
 
+        /// <summary>
+        /// Encodes a byte array according to the base64url scheme
+        /// </summary>
+        /// <param name="input">byte array</param>
+        /// <returns>encoded string</returns>
         public string Base64UrlEncode(byte[] input)
         {
             var result = Convert.ToBase64String(input);
             return result.Replace('+', '-').Replace('/', '_');
         }
 
+        /// <summary>
+        /// Decodes a string encoded with the base64url scheme into a byte array
+        /// </summary>
+        /// <param name="input">encoded string</param>
+        /// <returns>byte array</returns>
         public byte[] Base64UrlDecode(string input)
         {
             var result = input.Replace('-', '+').Replace('_', '/');

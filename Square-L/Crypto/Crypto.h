@@ -7,6 +7,7 @@ namespace Crypto
     public:
         CryptoRuntimeComponent();
 
+		// The following arrays all have fixed sizes
 		// public_key is 32 bytes
 		// private_key is 64 bytes
 		// seed is 32 bytes
@@ -24,6 +25,7 @@ namespace Crypto
 						    int message_length,
 						    const Platform::Array<unsigned char>^ public_key);
 
+		// The following array has a fixed size
 		// output is 32 bytes
 		void SHA256(Platform::WriteOnlyArray<unsigned char>^ output,
 			        const Platform::Array<unsigned char>^ input,

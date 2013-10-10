@@ -43,8 +43,6 @@ namespace Square_L
             IdentityViewModel identity = selector.SelectedItem as IdentityViewModel;
             if (identity == null) return;
             
-            //identity.Nickname += ".";
-
             NavigationService.Navigate(
                 new Uri("/ScanPage.xaml?selectedIndex="
                     + selector.SelectedIndex,
