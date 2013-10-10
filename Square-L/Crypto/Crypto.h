@@ -27,14 +27,6 @@ namespace Crypto
 
 		// The following array has a fixed size
 		// output is 32 bytes
-		void SHA256(Platform::WriteOnlyArray<unsigned char>^ output,
-			        const Platform::Array<unsigned char>^ input,
-					int input_length);
-		void HMAC_SHA256(Platform::WriteOnlyArray<unsigned char>^ output,
-			             const Platform::Array<unsigned char>^ key,
-				         int key_length,
-			             const Platform::Array<unsigned char>^ input,
-					     int input_length);
         void SCrypt(Platform::WriteOnlyArray<unsigned char>^ output,
 					const Platform::Array<unsigned char>^ password,
 					int password_length,

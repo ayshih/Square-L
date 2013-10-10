@@ -13,6 +13,7 @@ using System.Windows.Threading;
 using ZXing;
 using Crypto;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace Square_L
 {
@@ -255,8 +256,9 @@ namespace Square_L
             _crypto.SCrypt(scryptResult, password, password.Length, _passwordSalt, 8, 14, 8, 1);
             Debug.WriteLine("SCrypt of password+salt: " + Base64UrlEncode(scryptResult));
 
-            var passwordCheck = new byte[32];
-            _crypto.SHA256(passwordCheck, scryptResult, 32);
+            var _SHA256 = new SHA256Managed();
+
+            var passwordCheck = _SHA256.ComputeHash(scryptResult);
             Debug.WriteLine("Password verify: " + Base64UrlEncode(_passwordVerify));
             Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck));
 
@@ -266,13 +268,12 @@ namespace Square_L
                 Debug.WriteLine("True master key: " + Base64UrlEncode(trueMasterKey));
 
                 var now = BitConverter.GetBytes(DateTime.Now.Ticks);
-                var hash = new byte[32];
-                _crypto.SHA256(hash, now, now.Length);
+                var hash = _SHA256.ComputeHash(now);
                 _assembleUrl.AddParameter("sqrlnon", Base64UrlEncode(hash).Substring(0, 12));
 
-                var seed = new byte[32];
                 var DomainNameBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
-                _crypto.HMAC_SHA256(seed, trueMasterKey, trueMasterKey.Length, DomainNameBytes, DomainNameBytes.Length);
+                var _HMACSHA256 = new HMACSHA256(trueMasterKey);
+                var seed = _HMACSHA256.ComputeHash(DomainNameBytes);
 
                 var publicKey = new byte[32];
                 var privateKey = new byte[64];

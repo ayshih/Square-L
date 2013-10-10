@@ -39,30 +39,6 @@ bool CryptoRuntimeComponent::VerifySignature(const Platform::Array<unsigned char
 	return (result == 1);
 }
 
-void CryptoRuntimeComponent::SHA256(Platform::WriteOnlyArray<unsigned char>^ output,
-			                        const Platform::Array<unsigned char>^ input,
-					                int input_length)
-{
-	SHA256_CTX ctx;
-
-	SHA256_Init(&ctx);
-	SHA256_Update(&ctx, input->Data, input_length);
-	SHA256_Final(output->Data, &ctx);
-}
-
-void CryptoRuntimeComponent::HMAC_SHA256(Platform::WriteOnlyArray<unsigned char>^ output,
-			                             const Platform::Array<unsigned char>^ key,
-					                     int key_length,
-			                             const Platform::Array<unsigned char>^ input,
-					                     int input_length)
-{
-	HMAC_SHA256_CTX ctx;
-
-	HMAC_SHA256_Init(&ctx, key->Data, key_length);
-	HMAC_SHA256_Update(&ctx, input->Data, input_length);
-	HMAC_SHA256_Final(output->Data, &ctx);
-}
-
 void CryptoRuntimeComponent::SCrypt(Platform::WriteOnlyArray<unsigned char>^ output,
 									const Platform::Array<unsigned char>^ password,
 									int password_length,

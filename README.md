@@ -28,8 +28,6 @@ Notes
 -----
 This app incorporates the following C code, appropriately modified:
 * scrypt 1.1.6 (http://www.tarsnap.com/scrypt.html)
-  * for scrypt, SHA256, and HMAC-SHA256
   * 2-clause BSD license
 * nightcracker's ed25519 (https://github.com/nightcracker/ed25519)
-  * for ed25519
   * public domain
