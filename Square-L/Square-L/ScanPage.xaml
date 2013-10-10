@@ -36,7 +36,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Rectangle x:Name="Preview" Grid.Row="0" Grid.ColumnSpan="2" Stroke="{StaticResource PhoneAccentBrush}" StrokeThickness="4" HorizontalAlignment="Center" Height="400" VerticalAlignment="Top" Width="300">
+            <Rectangle x:Name="Preview" Grid.Row="0" Grid.ColumnSpan="2" Stroke="{StaticResource PhoneAccentBrush}" StrokeThickness="4" HorizontalAlignment="Center" Height="400" VerticalAlignment="Top" Width="300" Tap="Preview_Tap">
                 <Rectangle.Fill>
                     <VideoBrush x:Name="PreviewVideo">
                         <VideoBrush.RelativeTransform>

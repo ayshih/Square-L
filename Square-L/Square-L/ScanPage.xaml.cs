@@ -26,6 +26,8 @@ namespace Square_L
         private PhotoCamera _photoCamera;
         private AssembleUrl _assembleUrl;
 
+        private bool cameraActive;
+
         private byte[] _storedMasterKey;
         private byte[] _passwordSalt;
         private byte[] _passwordVerify;
@@ -49,7 +51,14 @@ namespace Square_L
 
         private void FocusCamera(object sender, EventArgs e)
         {
-            _photoCamera.Focus();
+            if (cameraActive) _photoCamera.Focus();
+        }
+
+        private void StopCamera()
+        {
+            _timer.Stop();
+            _photoCamera.Dispose();
+            cameraActive = false;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -77,8 +86,7 @@ namespace Square_L
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            _timer.Stop();
-            _photoCamera.Dispose();
+            StopCamera();
 
             CameraButtons.ShutterKeyHalfPressed -= FocusCamera;
 
@@ -87,6 +95,8 @@ namespace Square_L
 
         private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
         {
+            cameraActive = true;
+
             int width = Convert.ToInt32(_photoCamera.PreviewResolution.Width);
             int height = Convert.ToInt32(_photoCamera.PreviewResolution.Height);
 
@@ -110,8 +120,7 @@ namespace Square_L
                     _assembleUrl = new AssembleUrl(result.Text);
                     if (_assembleUrl.ValidSQRL())
                     {
-                        _timer.Stop();
-                        _photoCamera.Dispose();
+                        StopCamera();
 
                         ConnectingText.Text = _assembleUrl.DomainName;
                         Canvas.SetZIndex(Connecting, 1);
@@ -271,9 +280,9 @@ namespace Square_L
                 var hash = _SHA256.ComputeHash(now);
                 _assembleUrl.AddParameter("sqrlnon", Base64UrlEncode(hash).Substring(0, 12));
 
-                var DomainNameBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
+                var DomainNameInBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
                 var _HMACSHA256 = new HMACSHA256(trueMasterKey);
-                var seed = _HMACSHA256.ComputeHash(DomainNameBytes);
+                var seed = _HMACSHA256.ComputeHash(DomainNameInBytes);
 
                 var publicKey = new byte[32];
                 var privateKey = new byte[64];
@@ -312,6 +321,11 @@ namespace Square_L
 
                 NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
             }
+        }
+
+        private void Preview_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            FocusCamera(sender, e);
         }
     }
 
