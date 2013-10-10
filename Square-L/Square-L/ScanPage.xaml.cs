@@ -76,6 +76,7 @@ namespace Square_L
             SetPreviewRotation(((PhoneApplicationFrame)App.Current.RootVisual).Orientation);
 
             _photoCamera = new PhotoCamera();
+            SystemTray.ProgressIndicator.IsVisible = true;
             _photoCamera.Initialized += OnPhotoCameraInitialized;
             PreviewVideo.SetSource(_photoCamera);
 
@@ -103,7 +104,11 @@ namespace Square_L
             _luminance = new PhotoLuminanceSource(width, height);
             _reader = new QRCodeReader();
 
-            Dispatcher.BeginInvoke(() => _timer.Start());
+            Dispatcher.BeginInvoke(() =>
+            {
+                SystemTray.ProgressIndicator.IsVisible = false;
+                _timer.Start();
+            });
         }
 
         private void ScanBuffer()
@@ -253,6 +258,8 @@ namespace Square_L
                 Directions.Text = "verifying password";
                 PasswordGrid.Visibility = System.Windows.Visibility.Collapsed;
 
+                SystemTray.ProgressIndicator.IsVisible = true;
+
                 Dispatcher.BeginInvoke(() => VerifyPassword());
             }
         }
@@ -270,6 +277,8 @@ namespace Square_L
             var passwordCheck = _SHA256.ComputeHash(scryptResult);
             Debug.WriteLine("Password verify: " + Base64UrlEncode(_passwordVerify));
             Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck));
+
+            SystemTray.ProgressIndicator.IsVisible = false;
 
             if (Base64UrlEncode(_passwordVerify).Equals(Base64UrlEncode(passwordCheck)))
             {
