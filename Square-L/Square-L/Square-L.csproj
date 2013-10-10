@@ -155,7 +155,6 @@
     </Content>
     <Content Include="Assets\IconicTileSmall.png" />
     <Content Include="Assets\IconicTileMedium.png" />
-    <Content Include="README.txt" />
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
   <ItemGroup>
