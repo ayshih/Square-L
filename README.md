@@ -1,6 +1,11 @@
 Square-L
 ========
-A SQRL client for Windows Phone 8, currently at the proof-of-concept stage.  Identity management is not yet implemented; the identity (master key and password) is hard-coded.  You can scan a SQRL QR code, and then, upon entering the correct password, choose to send the SQRL login request.
+A SQRL client for Windows Phone 8, currently as a proof of concept.  As of release 0.2, you can:
+
+* create and delete identities (an identity called "test identity" with a hard-coded master key and password is recreated if deleted)
+* scan a SQRL QR code
+* verify identity password and generate appropriate keys
+* optionally send SQRL authentication query
 
 See also
 --------
