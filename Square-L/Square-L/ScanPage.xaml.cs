@@ -260,15 +260,20 @@ namespace Square_L
         {
             var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
 
+            Debug.WriteLine("Password salt: " + Base64UrlEncode(((IdentityViewModel)DataContext).passwordSalt));
+
             var scryptResult = new byte[32];
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             _crypto.SCrypt(scryptResult, password, password.Length, ((IdentityViewModel)DataContext).passwordSalt, 8, 14, 8, 1);
-            Debug.WriteLine("SCrypt of password+salt: " + Base64UrlEncode(scryptResult));
+            stopwatch.Stop();
+            Debug.WriteLine("SCrypt of password+salt: " + Base64UrlEncode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
             var _SHA256 = new SHA256Managed();
 
             var passwordCheck = _SHA256.ComputeHash(scryptResult);
             Debug.WriteLine("Password verify: " + Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash));
-            Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck));
+            Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck) + " (" + stopwatch.ElapsedMilliseconds.ToString() + ")");
 
             SystemTray.ProgressIndicator.IsVisible = false;
 
@@ -284,6 +289,7 @@ namespace Square_L
                 var DomainNameInBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
                 var _HMACSHA256 = new HMACSHA256(trueMasterKey);
                 var seed = _HMACSHA256.ComputeHash(DomainNameInBytes);
+                Debug.WriteLine("Seed: " + Base64UrlEncode(seed));
 
                 var publicKey = new byte[32];
                 var privateKey = new byte[64];
