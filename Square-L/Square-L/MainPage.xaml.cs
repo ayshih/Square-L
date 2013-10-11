@@ -104,5 +104,10 @@ namespace Square_L
             }
         }
 
+        private void ApplicationBarCreateIdentity_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/CreateIdentityPage.xaml", UriKind.Relative));
+        }
+
     }
 }
