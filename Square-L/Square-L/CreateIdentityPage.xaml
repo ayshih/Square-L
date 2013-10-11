@@ -59,6 +59,7 @@
                 <Grid x:Name="IdentityGrid" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                 <TextBox x:Name="NicknameBox" Grid.Row="0" Width="250" HorizontalAlignment="Center"/>

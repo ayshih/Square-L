@@ -23,6 +23,7 @@ namespace Square_L
         private Random _random;
         private byte[] _randomBytes;
 
+        private bool _cameraActive;
         private bool _readyToSave;
 
         private SHA256Managed _SHA256;
@@ -34,6 +35,7 @@ namespace Square_L
 
             _times = 50;
 
+            _cameraActive = false;
             _readyToSave = false;
 
             _random = new Random();
@@ -70,6 +72,7 @@ namespace Square_L
 
         private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
         {
+            _cameraActive = true;
         }
 
         private void HashBuffer()
@@ -157,7 +160,7 @@ namespace Square_L
         {
             SetLayout(e.Orientation);
             SetPreviewRotation(e.Orientation);
-            HashBuffer();
+            if (_cameraActive) HashBuffer();
         }
 
         public byte[] Xor(byte[] a, byte[] b)
