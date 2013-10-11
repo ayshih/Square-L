@@ -61,7 +61,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <PasswordBox x:Name="PasswordBox" Grid.Row="0" Width="300" HorizontalAlignment="Center" KeyDown="PasswordBox_KeyDown"/>
+                    <PasswordBox x:Name="PasswordBox" Grid.Row="0" Width="250" HorizontalAlignment="Center" KeyDown="PasswordBox_KeyDown"/>
                     <Button x:Name="PasswordLogin" Content="Login" Grid.Row="1" HorizontalAlignment="Center" Click="PasswordLogin_Click"/>
                 </Grid>
             </StackPanel>

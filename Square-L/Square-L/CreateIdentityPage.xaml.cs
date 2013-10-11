@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using Microsoft.Devices;
 using System.Windows.Threading;
+using Crypto;
 
 namespace Square_L
 {
@@ -22,13 +23,18 @@ namespace Square_L
         private Random _random;
         private byte[] _randomBytes;
 
+        private bool _readyToSave;
+
         private SHA256Managed _SHA256;
+        private CryptoRuntimeComponent _crypto;
 
         public CreateIdentityPage()
         {
             InitializeComponent();
 
             _times = 50;
+
+            _readyToSave = false;
 
             _random = new Random();
             _randomBytes = new byte[32];
@@ -37,6 +43,8 @@ namespace Square_L
             _hash = _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks));
             _random.NextBytes(_randomBytes);
             _hash = Xor(_hash, _SHA256.ComputeHash(_randomBytes));
+
+            _crypto = new CryptoRuntimeComponent();
         }
 
         private void StopCamera()
@@ -82,8 +90,8 @@ namespace Square_L
                     _random.NextBytes(_randomBytes);
                     _hash = Xor(_hash, _SHA256.ComputeHash(_randomBytes));
 
-                    ConnectingText.Text = Convert.ToBase64String(_hash);
-                    Canvas.SetZIndex(Connecting, 1);
+                    //ConnectingText.Text = Convert.ToBase64String(_hash);
+                    //Canvas.SetZIndex(Connecting, 1);
 
                     _times--;
                 }
@@ -91,7 +99,12 @@ namespace Square_L
             }
             else
             {
-                Directions.Text = "done rotating";
+                if (!_readyToSave)
+                {
+                    _readyToSave = true;
+                    Directions.Visibility = System.Windows.Visibility.Collapsed;
+                    IdentityGrid.Visibility = System.Windows.Visibility.Visible;
+                }
             }
         }
 
@@ -154,6 +167,34 @@ namespace Square_L
             for (var i = 0; i < length; i++)
                 result[i] = (byte)(a[i] ^ b[i]);
             return result;
+        }
+
+        private void IdentitySave_Click(object sender, RoutedEventArgs e)
+        {
+            if (NicknameBox.Text != "")
+            {
+                SystemTray.ProgressIndicator.IsVisible = true;
+
+                IdentityGrid.Visibility = System.Windows.Visibility.Collapsed;
+
+                Dispatcher.BeginInvoke(() => SaveIdentity());
+            }
+        }
+
+        private void SaveIdentity()
+        {
+            var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
+
+            var passwordSalt = new byte[8];
+            _random.NextBytes(passwordSalt);
+
+            var scryptResult = new byte[32];
+            _crypto.SCrypt(scryptResult, password, password.Length, passwordSalt, 8, 14, 8, 1);
+
+            var passwordHash = _SHA256.ComputeHash(scryptResult);
+
+            App.ViewModel.Identities.Add(new IdentityViewModel() { Nickname = NicknameBox.Text, LastUsed = new DateTime(0), masterKey = _hash, passwordSalt = passwordSalt, passwordHash = passwordHash });
+            NavigationService.GoBack();
         }
     }
 }

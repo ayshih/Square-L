@@ -28,10 +28,6 @@ namespace Square_L
 
         private bool cameraActive;
 
-        private byte[] _storedMasterKey;
-        private byte[] _passwordSalt;
-        private byte[] _passwordVerify;
-
         private CryptoRuntimeComponent _crypto;
 
         public ScanPage()
@@ -43,10 +39,6 @@ namespace Square_L
             _timer.Tick += (o, arg) => ScanBuffer();
 
             _crypto = new CryptoRuntimeComponent();
-
-            _storedMasterKey = Convert.FromBase64String("VxXA0VcczUN6nj/9bMVlCeP7ogpqhmLCK54GIFTSl1s=");
-            _passwordSalt = Convert.FromBase64String("Ze6tha++1E0=");
-            _passwordVerify = Convert.FromBase64String("TlA6rTzAcCYWm8o/UF6sk3i8mU2JR/db34/6nE3HKDg=");
         }
 
         private void FocusCamera(object sender, EventArgs e)
@@ -82,7 +74,7 @@ namespace Square_L
 
             CameraButtons.ShutterKeyHalfPressed += FocusCamera;
 
-            Debug.WriteLine("Stored master key: "+Base64UrlEncode(_storedMasterKey));
+            Debug.WriteLine("Stored master key: " + Base64UrlEncode(((IdentityViewModel)DataContext).masterKey));
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -269,20 +261,20 @@ namespace Square_L
             var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
 
             var scryptResult = new byte[32];
-            _crypto.SCrypt(scryptResult, password, password.Length, _passwordSalt, 8, 14, 8, 1);
+            _crypto.SCrypt(scryptResult, password, password.Length, ((IdentityViewModel)DataContext).passwordSalt, 8, 14, 8, 1);
             Debug.WriteLine("SCrypt of password+salt: " + Base64UrlEncode(scryptResult));
 
             var _SHA256 = new SHA256Managed();
 
             var passwordCheck = _SHA256.ComputeHash(scryptResult);
-            Debug.WriteLine("Password verify: " + Base64UrlEncode(_passwordVerify));
+            Debug.WriteLine("Password verify: " + Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash));
             Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck));
 
             SystemTray.ProgressIndicator.IsVisible = false;
 
-            if (Base64UrlEncode(_passwordVerify).Equals(Base64UrlEncode(passwordCheck)))
+            if (Base64UrlEncode(passwordCheck).Equals(Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash)))
             {
-                var trueMasterKey = Xor(_storedMasterKey, scryptResult);
+                var trueMasterKey = Xor(((IdentityViewModel)DataContext).masterKey, scryptResult);
                 Debug.WriteLine("True master key: " + Base64UrlEncode(trueMasterKey));
 
                 var now = BitConverter.GetBytes(DateTime.Now.Ticks);

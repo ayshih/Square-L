@@ -40,8 +40,8 @@ namespace Square_L
         public void LoadData()
         {
             // Sample data; replace with real data
-            this.Identities.Add(new IdentityViewModel() { Nickname = "test identity", LastUsed = new DateTime(2013, 10, 7, 17, 47, 0) });
-            this.Identities.Add(new IdentityViewModel() { Nickname = "additional identity for testing", LastUsed = new DateTime(0) });
+            this.Identities.Add(new IdentityViewModel() { Nickname = "test identity", LastUsed = new DateTime(2013, 10, 7, 17, 47, 0), masterKey = Convert.FromBase64String("VxXA0VcczUN6nj/9bMVlCeP7ogpqhmLCK54GIFTSl1s="), passwordSalt = Convert.FromBase64String("Ze6tha++1E0="), passwordHash = Convert.FromBase64String("TlA6rTzAcCYWm8o/UF6sk3i8mU2JR/db34/6nE3HKDg=") });
+            this.Identities.Add(new IdentityViewModel() { Nickname = "additional identity for testing", LastUsed = new DateTime(0), masterKey = Convert.FromBase64String("VxXA0VcczUN6nj/9bMVlCeP7ogpqhmLCK54GIFTSl1s="), passwordSalt = Convert.FromBase64String("Ze6tha++1E0="), passwordHash = Convert.FromBase64String("TlA6rTzAcCYWm8o/UF6sk3i8mU2JR/db34/6nE3HKDg=") });
 
             this.IsDataLoaded = true;
         }

@@ -63,6 +63,10 @@ namespace Square_L
             get { return "Last used: " + _lastUsed.ToString(); }
         }
 
+        public byte[] masterKey { get; set; }
+        public byte[] passwordSalt { get; set; }
+        public byte[] passwordHash { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
         {

@@ -56,11 +56,14 @@
 
             <StackPanel x:Name="Other" Grid.Row="1" Grid.ColumnSpan="2" >
                 <TextBlock x:Name="Directions" HorizontalAlignment="Center" TextWrapping="Wrap" Text="rotate phone" VerticalAlignment="Top" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
-                <Grid x:Name="PasswordGrid" Visibility="Collapsed">
+                <Grid x:Name="IdentityGrid" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+                <TextBox x:Name="NicknameBox" Grid.Row="0" Width="250" HorizontalAlignment="Center"/>
+                <PasswordBox x:Name="PasswordBox" Grid.Row="1" Width="250" HorizontalAlignment="Center"/>
+                <Button x:Name="IdentitySave" Content="Save" Grid.Row="2" HorizontalAlignment="Center" Click="IdentitySave_Click"/>
                 </Grid>
             </StackPanel>
         </Grid>
