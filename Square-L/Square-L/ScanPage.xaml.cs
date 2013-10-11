@@ -131,23 +131,6 @@ namespace Square_L
             catch { }
         }
 
-        private void webClient_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
-        {
-            if (!e.Cancelled)
-            {
-                if (e.Error == null)
-                {
-                    MessageBox.Show(e.Result, "Server response", MessageBoxButton.OK);
-                }
-                else
-                {
-                    MessageBox.Show(e.Error.Message, "Communication error", MessageBoxButton.OK);
-                }
-
-                NavigationService.GoBack();
-            }
-        }
-
         /// <summary>
         /// Rearranges the elements on the page depending on the page orientation
         /// </summary>
@@ -272,10 +255,8 @@ namespace Square_L
             var _SHA256 = new SHA256Managed();
 
             var passwordCheck = _SHA256.ComputeHash(scryptResult);
-            Debug.WriteLine("Password verify: " + Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash));
-            Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck) + " (" + stopwatch.ElapsedMilliseconds.ToString() + ")");
-
-            SystemTray.ProgressIndicator.IsVisible = false;
+            Debug.WriteLine("Password hash: " + Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash));
+            Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck));
 
             if (Base64UrlEncode(passwordCheck).Equals(Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash)))
             {
@@ -284,7 +265,7 @@ namespace Square_L
 
                 var now = BitConverter.GetBytes(DateTime.Now.Ticks);
                 var hash = _SHA256.ComputeHash(now);
-                _assembleUrl.AddParameter("sqrlnon", Base64UrlEncode(hash).Substring(0, 12));
+                //_assembleUrl.AddParameter("sqrlnon", Base64UrlEncode(hash).Substring(0, 12));
 
                 var DomainNameInBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
                 var _HMACSHA256 = new HMACSHA256(trueMasterKey);
@@ -297,25 +278,37 @@ namespace Square_L
                 Debug.WriteLine("Public key: " + Base64UrlEncode(publicKey));
                 Debug.WriteLine("Private key: " + Base64UrlEncode(privateKey));
 
-                var signature = new byte[64];
-                var challenge = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.Buffer);
-                _crypto.CreateSignature(signature, challenge, challenge.Length, publicKey, privateKey);
-                Debug.WriteLine("Challenge: " + _assembleUrl.Buffer);
-                Debug.WriteLine("Signature: " + Base64UrlEncode(signature));
-
-                _assembleUrl.AddParameter("sqrlsig", Base64UrlEncode(signature).TrimEnd('='));
+                _assembleUrl.AddParameter("sqrlver", "1.0");
+                _assembleUrl.AddParameter("sqrlurl", _assembleUrl.Protocol);
+                //_assembleUrl.AddParameter("sqrlopt", "enforce");
                 _assembleUrl.AddParameter("sqrlkey", Base64UrlEncode(publicKey).TrimEnd('='));
 
-                _assembleUrl.AddParameter("sqrlver", "1.0");
+                var challenge = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.Buffer);
+                var query = (_assembleUrl.Protocol == "sqrl" ? "https://" : "http://") + _assembleUrl.Buffer;
+                Debug.WriteLine("Challenge: " + _assembleUrl.Buffer);
 
-                var query = (_assembleUrl.Protocol == "sqrl:" ? "https://" : "http://") + _assembleUrl.Buffer;
+                var signature = new byte[64];
+                _crypto.CreateSignature(signature, challenge, challenge.Length, publicKey, privateKey);
+                Debug.WriteLine("Signature: " + Base64UrlEncode(signature));
 
-                var selection = MessageBox.Show(query, "Send SQRL login?", MessageBoxButton.OKCancel);
+                //var parameters = "message="+HttpUtility.UrlEncode(_assembleUrl.Buffer)
+                //    +"&signature="+Base64UrlEncode(signature).TrimEnd('=')
+                //    +"&publicKey="+Base64UrlEncode(publicKey).TrimEnd('=');
+                var parameters = "sqrlsig=" + Base64UrlEncode(signature).TrimEnd('=');
+                Debug.WriteLine("Parameters: " + parameters);
+
+                var selection = MessageBox.Show(query+"\n\n"+parameters, "Send SQRL login?", MessageBoxButton.OKCancel);
                 if (selection == MessageBoxResult.OK)
                 {
+                    Directions.Text = "sending authentication";
+
                     var webClient = new WebClient();
-                    webClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(webClient_DownloadStringCompleted);
-                    webClient.DownloadStringAsync(new Uri(query));
+
+                    webClient.UploadStringCompleted += new UploadStringCompletedEventHandler(ParseQueryResponse);
+                    webClient.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+
+                    //webClient.UploadStringAsync(new Uri("http://ed25519.herokuapp.com/api/Verify"), parameters);
+                    webClient.UploadStringAsync(new Uri(query), parameters);
                 }
                 else
                 {
@@ -325,6 +318,23 @@ namespace Square_L
             else
             {
                 MessageBox.Show("The password you entered does not verify", "Password error", MessageBoxButton.OK);
+
+                NavigationService.GoBack();
+            }
+        }
+
+        private void ParseQueryResponse(object sender, UploadStringCompletedEventArgs e)
+        {
+            if (!e.Cancelled)
+            {
+                if (e.Error == null)
+                {
+                    MessageBox.Show(e.Result, "Server response", MessageBoxButton.OK);
+                }
+                else
+                {
+                    MessageBox.Show(e.Error.Message, "Communication error", MessageBoxButton.OK);
+                }
 
                 NavigationService.GoBack();
             }

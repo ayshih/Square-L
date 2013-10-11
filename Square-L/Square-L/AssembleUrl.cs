@@ -17,7 +17,7 @@ namespace Square_L
             char[] tokens = { '/', '?', '&' };
             var items = url.Split(tokens);
 
-            Protocol = items[0];
+            Protocol = items[0].TrimEnd(':');
             DomainName = items[2];
 
             foreach (var item in items)
@@ -28,7 +28,7 @@ namespace Square_L
                 }
             }
 
-            Buffer = url.Substring(Protocol.Length + 2);
+            Buffer = url.Substring(Protocol.Length + 3);
 
             //If there is no '?' at all, append one
             if (!url.Contains('?')) Buffer += '?';
@@ -52,11 +52,11 @@ namespace Square_L
         /// <returns></returns>
         public bool ValidSQRL()
         {
-            return Protocol.Contains("qrl");
+            return Protocol.EndsWith("qrl");
         }
 
         /// <summary>
-        /// Ought to be "sqrl:" or "qrl:"
+        /// Ought to be "sqrl" or "qrl" for a valid SQRL URL
         /// </summary>
         public string Protocol { get; private set; }
 
