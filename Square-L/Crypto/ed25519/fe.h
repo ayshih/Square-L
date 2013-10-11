@@ -1,7 +1,7 @@
 #ifndef FE_H
 #define FE_H
 
-#include <stdint.h>
+#include <stdint.h> //CHANGE: replaced include of fixedint.h
 
 
 /*

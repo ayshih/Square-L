@@ -9,7 +9,7 @@
  * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
-#include <stdint.h>
+#include <stdint.h> //CHANGE: replaced include of fixedint.h
 #include "sha512.h"
 
 /* the K array */

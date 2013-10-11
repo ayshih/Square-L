@@ -26,7 +26,7 @@
  * This file was originally written by Colin Percival as part of the Tarsnap
  * online backup system.
  */
-//#include "scrypt_platform.h"
+//CHANGE: removed include of scrypt_platform.h
 
 #include <errno.h>
 #include <stdint.h>
@@ -247,11 +247,11 @@ crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 	}
 
 	/* Allocate memory. */
-	if ((B = (uint8_t *)malloc(128 * r * p)) == NULL)
+	if ((B = (uint8_t *)malloc(128 * r * p)) == NULL) //CHANGE: added explicit cast
 		goto err0;
-	if ((XY = (uint8_t *)malloc(256 * r)) == NULL)
+	if ((XY = (uint8_t *)malloc(256 * r)) == NULL) //CHANGE: added explicit cast
 		goto err1;
-	if ((V = (uint8_t *)malloc(128 * r * N)) == NULL)
+	if ((V = (uint8_t *)malloc(128 * r * N)) == NULL) //CHANGE: added explicit cast
 		goto err2;
 
 	/* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */

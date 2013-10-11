@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <stdint.h> //CHANGE: replaced include of fixedint.h
 #include "sc.h"
 
 static uint64_t load_3(const unsigned char *in) {

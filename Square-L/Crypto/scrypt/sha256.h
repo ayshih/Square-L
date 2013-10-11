@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 
+//CHANGE: added extern wrapper
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -63,6 +64,7 @@ void	HMAC_SHA256_Final(unsigned char [32], HMAC_SHA256_CTX *);
 void	PBKDF2_SHA256(const uint8_t *, size_t, const uint8_t *, size_t,
     uint64_t, uint8_t *, size_t);
 
+//CHANGE: added extern wrapper
 #ifdef __cplusplus
 }
 #endif

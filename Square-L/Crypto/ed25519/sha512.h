@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#include <stdint.h>
+#include <stdint.h> //CHANGE: replaced include of fixedint.h
 
 /* state */
 typedef struct sha512_context_ {

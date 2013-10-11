@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <stdint.h> //CHANGE: replaced include of fixedint.h
 #include "fe.h"
 
 
@@ -225,7 +225,7 @@ void fe_cswap(fe f,fe g,unsigned int b) {
     int32_t x7 = f7 ^ g7;
     int32_t x8 = f8 ^ g8;
     int32_t x9 = f9 ^ g9;
-    b = (unsigned int) (- (int) b); /* silence warning */
+    b = (unsigned int) (- (int) b); /* silence warning */ //CHANGE: fixed warning for b = -b
     x0 &= b;
     x1 &= b;
     x2 &= b;
