@@ -83,33 +83,23 @@ namespace Square_L
 
                 var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
                 settings.Remove("identity_"+identity.Nickname);
+                settings.Save();
             }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-
-            var frame = (PhoneApplicationFrame)App.Current.RootVisual;
-            if (frame.CanGoBack)
-            {
-                if (frame.BackStack.First().Source.ToString().StartsWith("/ScanPage.xaml"))
-                {
-                    NavigationService.RemoveBackEntry();
-                    if (frame.CanGoBack)
-                    {
-                        if (frame.BackStack.First().Source.ToString().StartsWith("/MainPage.xaml"))
-                        {
-                            NavigationService.RemoveBackEntry();
-                        }
-                    }
-                }
-            }
         }
 
         private void ApplicationBarCreateIdentity_Click(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/CreateIdentityPage.xaml", UriKind.Relative));
+        }
+
+        private void ApplicationBarHelp_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/HelpPage.xaml", UriKind.Relative));
         }
 
     }

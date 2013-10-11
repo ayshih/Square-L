@@ -41,14 +41,14 @@
                 </ListBox>
             </controls:PivotItem>
 
-            <controls:PivotItem Header="about">
-            </controls:PivotItem>
+            <!--<controls:PivotItem Header="about">
+            </controls:PivotItem>-->
         </controls:Pivot>
     </Grid>
     
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
-            <!--<shell:ApplicationBarIconButton IconUri="/Assets/feature.camera.png" Text="Test"/>-->
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Assets/questionmark.png" Text="Help" Click="ApplicationBarHelp_Click"/>
             <shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem Text="create identity" Click="ApplicationBarCreateIdentity_Click"/>
                 <shell:ApplicationBarMenuItem Text="import identity"/>

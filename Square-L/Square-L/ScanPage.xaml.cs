@@ -144,7 +144,7 @@ namespace Square_L
                     MessageBox.Show(e.Error.Message, "Communication error", MessageBoxButton.OK);
                 }
 
-                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                NavigationService.GoBack();
             }
         }
 
@@ -319,14 +319,14 @@ namespace Square_L
                 }
                 else
                 {
-                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                    NavigationService.GoBack();
                 }
             }
             else
             {
                 MessageBox.Show("The password you entered does not verify", "Password error", MessageBoxButton.OK);
 
-                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                NavigationService.GoBack();
             }
         }
 
