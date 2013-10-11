@@ -42,7 +42,7 @@ namespace Square_L
 
             IdentityViewModel identity = selector.SelectedItem as IdentityViewModel;
             if (identity == null) return;
-            
+
             NavigationService.Navigate(
                 new Uri("/ScanPage.xaml?selectedIndex="
                     + selector.SelectedIndex,
@@ -80,6 +80,9 @@ namespace Square_L
             if (m == MessageBoxResult.OK)
             {
                 App.ViewModel.Identities.Remove(identity);
+
+                var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
+                settings.Remove("identity_"+identity.Nickname);
             }
         }
 

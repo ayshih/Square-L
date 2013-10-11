@@ -196,7 +196,14 @@ namespace Square_L
 
             var passwordHash = _SHA256.ComputeHash(scryptResult);
 
-            App.ViewModel.Identities.Add(new IdentityViewModel() { Nickname = NicknameBox.Text, LastUsed = new DateTime(0), masterKey = _hash, passwordSalt = passwordSalt, passwordHash = passwordHash });
+            var identity = new Identity() { nickname = NicknameBox.Text, lastUsed = new DateTime(0), masterKey = _hash, passwordSalt = passwordSalt, passwordHash = passwordHash };
+
+            var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
+            settings.Add("identity_" + identity.nickname, identity);
+            settings.Save();
+
+            App.ViewModel.Identities.Add(new IdentityViewModel() { identity = identity });
+
             NavigationService.GoBack();
         }
     }

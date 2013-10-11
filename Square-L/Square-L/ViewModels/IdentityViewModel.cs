@@ -15,7 +15,8 @@ namespace Square_L
 {
     public class IdentityViewModel : INotifyPropertyChanged
     {
-        private string _nickname;
+        public Identity identity;
+
         /// <summary>
         /// The nickname for an identity
         /// </summary>
@@ -24,31 +25,30 @@ namespace Square_L
         {
             get
             {
-                return _nickname;
+                return identity.nickname;
             }
             set
             {
-                if (value != _nickname)
+                if (value != identity.nickname)
                 {
-                    _nickname = value;
+                    identity.nickname = value;
                     NotifyPropertyChanged("Nickname");
                 }
             }
         }
 
-        private DateTime _lastUsed;
         /// <summary>
         /// The last time an identity was used as a DateTime object
         /// </summary>
         /// <returns></returns>
         public DateTime LastUsed
         {
-            get { return _lastUsed; }
+            get { return identity.lastUsed; }
             set
             {
-                if (value != _lastUsed)
+                if (value != identity.lastUsed)
                 {
-                    _lastUsed = value;
+                    identity.lastUsed = value;
                     NotifyPropertyChanged("LastUsed");
                 }
             }
@@ -60,12 +60,12 @@ namespace Square_L
         /// <returns></returns>
         public string LastUsedString
         {
-            get { return "Last used: " + _lastUsed.ToString(); }
+            get { return "Last used: " + LastUsed.ToString(); }
         }
 
-        public byte[] masterKey { get; set; }
-        public byte[] passwordSalt { get; set; }
-        public byte[] passwordHash { get; set; }
+        public byte[] masterKey { get { return identity.masterKey; } }
+        public byte[] passwordSalt { get { return identity.passwordSalt; } }
+        public byte[] passwordHash { get { return identity.passwordHash; } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)

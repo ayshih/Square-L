@@ -115,6 +115,7 @@
     <Compile Include="CreateIdentityPage.xaml.cs">
       <DependentUpon>CreateIdentityPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Identity.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
