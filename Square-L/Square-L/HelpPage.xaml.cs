@@ -31,7 +31,7 @@ namespace Square_L
             _random = new Random();
             _crypto = new CryptoRuntimeComponent();
 
-            LongText = "Performing SCrypt runs...\n";
+            LongText = "";
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -44,14 +44,12 @@ namespace Square_L
             var writer = new BarcodeWriter() { Format = BarcodeFormat.QR_CODE };
             var qrcode = writer.Write(Base64Url.Encode(hash));
             Image.Source = qrcode;
-
-            SystemTray.ProgressIndicator.IsVisible = true;
-
-            Dispatcher.BeginInvoke(() => TestSCrypt());
         }
 
         public void TestSCrypt()
         {
+            LongText = "";
+
             var password = System.Text.Encoding.UTF8.GetBytes("password");
 
             var passwordSalt = new byte[8];
@@ -103,6 +101,13 @@ namespace Square_L
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private void SCryptTest_Click(object sender, RoutedEventArgs e)
+        {
+            SystemTray.ProgressIndicator.IsVisible = true;
+
+            Dispatcher.BeginInvoke(() => TestSCrypt());
         }
     }
 }
