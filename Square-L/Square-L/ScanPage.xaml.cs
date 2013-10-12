@@ -278,9 +278,9 @@ namespace Square_L
                 Debug.WriteLine("Public key: " + Base64UrlEncode(publicKey));
                 Debug.WriteLine("Private key: " + Base64UrlEncode(privateKey));
 
-                _assembleUrl.AddParameter("sqrlver", "1.0");
+                _assembleUrl.AddParameter("sqrlver", "1");
                 _assembleUrl.AddParameter("sqrlurl", _assembleUrl.Protocol);
-                //_assembleUrl.AddParameter("sqrlopt", "enforce");
+                _assembleUrl.AddParameter("sqrlopt", "");
                 _assembleUrl.AddParameter("sqrlkey", Base64UrlEncode(publicKey).TrimEnd('='));
 
                 var challenge = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.Buffer);
@@ -291,9 +291,6 @@ namespace Square_L
                 _crypto.CreateSignature(signature, challenge, challenge.Length, publicKey, privateKey);
                 Debug.WriteLine("Signature: " + Base64UrlEncode(signature));
 
-                //var parameters = "message="+HttpUtility.UrlEncode(_assembleUrl.Buffer)
-                //    +"&signature="+Base64UrlEncode(signature).TrimEnd('=')
-                //    +"&publicKey="+Base64UrlEncode(publicKey).TrimEnd('=');
                 var parameters = "sqrlsig=" + Base64UrlEncode(signature).TrimEnd('=');
                 Debug.WriteLine("Parameters: " + parameters);
 
@@ -307,7 +304,6 @@ namespace Square_L
                     webClient.UploadStringCompleted += new UploadStringCompletedEventHandler(ParseQueryResponse);
                     webClient.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
 
-                    //webClient.UploadStringAsync(new Uri("http://ed25519.herokuapp.com/api/Verify"), parameters);
                     webClient.UploadStringAsync(new Uri(query), parameters);
                 }
                 else
