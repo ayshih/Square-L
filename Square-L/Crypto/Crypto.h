@@ -32,6 +32,6 @@ namespace Crypto
 					int password_length,
 					const Platform::Array<unsigned char>^ salt,
 					int salt_length,
-					int N, int r, int p);
+					int log2_N, int r, int p);
     };
 }

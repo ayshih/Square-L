@@ -6,6 +6,7 @@
 #include "scrypt\sha256.h"
 
 #include <string.h>
+#include <errno.h>
 
 using namespace Crypto;
 using namespace Platform;
@@ -44,8 +45,21 @@ void CryptoRuntimeComponent::SCrypt(Platform::WriteOnlyArray<unsigned char>^ out
 									int password_length,
 									const Platform::Array<unsigned char>^ salt,
 									int salt_length,
-									int N, int r, int p)
+									int log2_N, int r, int p)
 {
-	// Return 0 on success; or -1 on error.
-	crypto_scrypt(password->Data, password_length, salt->Data, salt_length, 1 << N, r, p, output->Data, 32);
+	errno = 0;
+	if (crypto_scrypt(password->Data, password_length, salt->Data, salt_length, 1 << log2_N, r, p, output->Data, 32) == -1)
+	{
+		switch (errno)
+		{
+		case EFBIG:
+			throw ref new Platform::InvalidArgumentException("r*p >= 2^30");
+		case EINVAL:
+			throw ref new Platform::InvalidArgumentException("N not a power of 2");
+		case ENOMEM:
+			throw ref new Platform::OutOfMemoryException("Implied memory request will be too large");
+		default:
+			throw ref new Platform::OutOfMemoryException("Failed to allocate memory");
+		}
+	}
 }

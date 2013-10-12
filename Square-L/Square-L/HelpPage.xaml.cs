@@ -62,15 +62,20 @@ namespace Square_L
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            for (var i=12; i<=16; i += 2)
-                for (var j = 1; j <= 3; j++)
-                {
-                    _crypto.SCrypt(scryptResult, password, password.Length, passwordSalt, passwordSalt.Length, i, 8, j);
-                    var output = "{2^" + i + ",8," + j + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
-                    LongText += output + "\n";
-                    Debug.WriteLine(output);
-                    stopwatch.Restart();
-                }
+            int[] list_log2_N = { 14, 16 };
+            int[] list_r = { 8, 16 };
+            int[] list_p = { 1, 4 };
+
+            foreach (var log2_N in list_log2_N)
+                foreach (var r in list_r)
+                    foreach (var p in list_p)
+                    {
+                        _crypto.SCrypt(scryptResult, password, password.Length, passwordSalt, passwordSalt.Length, log2_N, r, p);
+                        var output = "{2^" + log2_N + "," + r + "," + p + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
+                        LongText += output + "\n";
+                        Debug.WriteLine(output);
+                        stopwatch.Restart();
+                    }
 
             stopwatch.Stop();
             SystemTray.ProgressIndicator.IsVisible = false;
