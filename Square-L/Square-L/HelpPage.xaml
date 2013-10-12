@@ -13,6 +13,10 @@
     mc:Ignorable="d"
     shell:SystemTray.IsVisible="True">
 
+    <shell:SystemTray.ProgressIndicator>
+        <shell:ProgressIndicator IsIndeterminate="True" IsVisible="False"/>
+    </shell:SystemTray.ProgressIndicator>
+
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <Grid.RowDefinitions>
@@ -28,7 +32,10 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Image x:Name="Image" HorizontalAlignment="Center" Height="300"  VerticalAlignment="Top" Width="300"/>
+                <TextBlock x:Name="Text" Text="{Binding Path=LongText}" Height="300" Width="300"/>
+            </StackPanel>
         </Grid>
     </Grid>
 
