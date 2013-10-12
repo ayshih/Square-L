@@ -74,7 +74,7 @@ namespace Square_L
 
             CameraButtons.ShutterKeyHalfPressed += FocusCamera;
 
-            Debug.WriteLine("Stored master key: " + Base64UrlEncode(((IdentityViewModel)DataContext).masterKey));
+            Debug.WriteLine("Stored master key: " + Base64Url.Encode(((IdentityViewModel)DataContext).masterKey));
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -182,37 +182,6 @@ namespace Square_L
             SetPreviewRotation(e.Orientation);
         }
 
-        /// <summary>
-        /// Encodes a byte array according to the base64url scheme
-        /// </summary>
-        /// <param name="input">byte array</param>
-        /// <returns>encoded string</returns>
-        public string Base64UrlEncode(byte[] input)
-        {
-            var result = Convert.ToBase64String(input);
-            return result.Replace('+', '-').Replace('/', '_');
-        }
-
-        /// <summary>
-        /// Decodes a string encoded with the base64url scheme into a byte array
-        /// </summary>
-        /// <param name="input">encoded string</param>
-        /// <returns>byte array</returns>
-        public byte[] Base64UrlDecode(string input)
-        {
-            var result = input.Replace('-', '+').Replace('_', '/');
-            return Convert.FromBase64String(result);
-        }
-
-        public byte[] Xor(byte[] a, byte[] b)
-        {
-            int length = (a.Length < b.Length ? a.Length : b.Length);
-            byte[] result = new byte[length];
-            for (var i = 0; i < length; i++)
-                result[i] = (byte)(a[i] ^ b[i]);
-            return result;
-        }
-
         private void PasswordLogin_Click(object sender, RoutedEventArgs e)
         {
             UsePassword();
@@ -243,45 +212,41 @@ namespace Square_L
         {
             var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
 
-            Debug.WriteLine("Password salt: " + Base64UrlEncode(((IdentityViewModel)DataContext).passwordSalt));
+            Debug.WriteLine("Password salt: " + Base64Url.Encode(((IdentityViewModel)DataContext).passwordSalt));
 
             var scryptResult = new byte[32];
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             _crypto.SCrypt(scryptResult, password, password.Length, ((IdentityViewModel)DataContext).passwordSalt, 8, 14, 8, 1);
             stopwatch.Stop();
-            Debug.WriteLine("SCrypt of password+salt: " + Base64UrlEncode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
+            Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
             var _SHA256 = new SHA256Managed();
 
             var passwordCheck = _SHA256.ComputeHash(scryptResult);
-            Debug.WriteLine("Password hash: " + Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash));
-            Debug.WriteLine("Password check: " + Base64UrlEncode(passwordCheck));
+            Debug.WriteLine("Password hash: " + Base64Url.Encode(((IdentityViewModel)DataContext).passwordHash));
+            Debug.WriteLine("Password check: " + Base64Url.Encode(passwordCheck));
 
-            if (Base64UrlEncode(passwordCheck).Equals(Base64UrlEncode(((IdentityViewModel)DataContext).passwordHash)))
+            if (Base64Url.Encode(passwordCheck).Equals(Base64Url.Encode(((IdentityViewModel)DataContext).passwordHash)))
             {
-                var trueMasterKey = Xor(((IdentityViewModel)DataContext).masterKey, scryptResult);
-                Debug.WriteLine("True master key: " + Base64UrlEncode(trueMasterKey));
-
-                var now = BitConverter.GetBytes(DateTime.Now.Ticks);
-                var hash = _SHA256.ComputeHash(now);
-                //_assembleUrl.AddParameter("sqrlnon", Base64UrlEncode(hash).Substring(0, 12));
+                var trueMasterKey = Utility.Xor(((IdentityViewModel)DataContext).masterKey, scryptResult);
+                Debug.WriteLine("True master key: " + Base64Url.Encode(trueMasterKey));
 
                 var DomainNameInBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
                 var _HMACSHA256 = new HMACSHA256(trueMasterKey);
                 var seed = _HMACSHA256.ComputeHash(DomainNameInBytes);
-                Debug.WriteLine("Seed: " + Base64UrlEncode(seed));
+                Debug.WriteLine("Seed: " + Base64Url.Encode(seed));
 
                 var publicKey = new byte[32];
                 var privateKey = new byte[64];
                 _crypto.CreateKeyPair(publicKey, privateKey, seed);
-                Debug.WriteLine("Public key: " + Base64UrlEncode(publicKey));
-                Debug.WriteLine("Private key: " + Base64UrlEncode(privateKey));
+                Debug.WriteLine("Public key: " + Base64Url.Encode(publicKey));
+                Debug.WriteLine("Private key: " + Base64Url.Encode(privateKey));
 
                 _assembleUrl.AddParameter("sqrlver", "1");
                 _assembleUrl.AddParameter("sqrlurl", _assembleUrl.Protocol);
                 _assembleUrl.AddParameter("sqrlopt", "");
-                _assembleUrl.AddParameter("sqrlkey", Base64UrlEncode(publicKey).TrimEnd('='));
+                _assembleUrl.AddParameter("sqrlkey", Base64Url.Encode(publicKey));
 
                 var challenge = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.Buffer);
                 var query = (_assembleUrl.Protocol == "sqrl" ? "https://" : "http://") + _assembleUrl.Buffer;
@@ -289,9 +254,9 @@ namespace Square_L
 
                 var signature = new byte[64];
                 _crypto.CreateSignature(signature, challenge, challenge.Length, publicKey, privateKey);
-                Debug.WriteLine("Signature: " + Base64UrlEncode(signature));
+                Debug.WriteLine("Signature: " + Base64Url.Encode(signature));
 
-                var parameters = "sqrlsig=" + Base64UrlEncode(signature).TrimEnd('=');
+                var parameters = "sqrlsig=" + Base64Url.Encode(signature);
                 Debug.WriteLine("Parameters: " + parameters);
 
                 var selection = MessageBox.Show(query+"\n\n"+parameters, "Send SQRL login?", MessageBoxButton.OKCancel);

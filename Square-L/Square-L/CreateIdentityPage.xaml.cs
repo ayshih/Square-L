@@ -44,7 +44,7 @@ namespace Square_L
             _SHA256 = new SHA256Managed();
             _hash = _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks));
             _random.NextBytes(_randomBytes);
-            _hash = Xor(_hash, _SHA256.ComputeHash(_randomBytes));
+            _hash = Utility.Xor(_hash, _SHA256.ComputeHash(_randomBytes));
 
             _crypto = new CryptoRuntimeComponent();
         }
@@ -88,10 +88,10 @@ namespace Square_L
 
                     var buffer = new byte[width*height];
                     _photoCamera.GetPreviewBufferY(buffer);
-                    _hash = Xor(_hash, _SHA256.ComputeHash(buffer));
-                    _hash = Xor(_hash, _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks)));
+                    _hash = Utility.Xor(_hash, _SHA256.ComputeHash(buffer));
+                    _hash = Utility.Xor(_hash, _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks)));
                     _random.NextBytes(_randomBytes);
-                    _hash = Xor(_hash, _SHA256.ComputeHash(_randomBytes));
+                    _hash = Utility.Xor(_hash, _SHA256.ComputeHash(_randomBytes));
 
                     //ConnectingText.Text = Convert.ToBase64String(_hash);
                     //Canvas.SetZIndex(Connecting, 1);
@@ -161,15 +161,6 @@ namespace Square_L
             SetLayout(e.Orientation);
             SetPreviewRotation(e.Orientation);
             if (_cameraActive) HashBuffer();
-        }
-
-        public byte[] Xor(byte[] a, byte[] b)
-        {
-            int length = (a.Length < b.Length ? a.Length : b.Length);
-            byte[] result = new byte[length];
-            for (var i = 0; i < length; i++)
-                result[i] = (byte)(a[i] ^ b[i]);
-            return result;
         }
 
         private void IdentitySave_Click(object sender, RoutedEventArgs e)
