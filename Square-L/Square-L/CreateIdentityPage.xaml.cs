@@ -183,7 +183,7 @@ namespace Square_L
             _random.NextBytes(passwordSalt);
 
             var scryptResult = new byte[32];
-            _crypto.SCrypt(scryptResult, password, password.Length, passwordSalt, 8, 14, 8, 1);
+            _crypto.SCrypt(scryptResult, password, passwordSalt, 14, 8, 1);
 
             var passwordHash = _SHA256.ComputeHash(scryptResult);
 

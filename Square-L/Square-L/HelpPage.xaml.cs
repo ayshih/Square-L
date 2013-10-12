@@ -68,7 +68,7 @@ namespace Square_L
                 foreach (var r in list_r)
                     foreach (var p in list_p)
                     {
-                        _crypto.SCrypt(scryptResult, password, password.Length, passwordSalt, passwordSalt.Length, log2_N, r, p);
+                        _crypto.SCrypt(scryptResult, password, passwordSalt, log2_N, r, p);
                         var output = "{2^" + log2_N + "," + r + "," + p + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         LongText += output + "\n";
                         Debug.WriteLine(output);

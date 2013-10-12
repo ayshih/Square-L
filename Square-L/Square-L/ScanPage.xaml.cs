@@ -217,7 +217,7 @@ namespace Square_L
             var scryptResult = new byte[32];
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            _crypto.SCrypt(scryptResult, password, password.Length, ((IdentityViewModel)DataContext).passwordSalt, 8, 14, 8, 1);
+            _crypto.SCrypt(scryptResult, password, ((IdentityViewModel)DataContext).passwordSalt, 14, 8, 1);
             stopwatch.Stop();
             Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -253,7 +253,7 @@ namespace Square_L
                 Debug.WriteLine("Challenge: " + _assembleUrl.Buffer);
 
                 var signature = new byte[64];
-                _crypto.CreateSignature(signature, challenge, challenge.Length, publicKey, privateKey);
+                _crypto.CreateSignature(signature, challenge, publicKey, privateKey);
                 Debug.WriteLine("Signature: " + Base64Url.Encode(signature));
 
                 var parameters = "sqrlsig=" + Base64Url.Encode(signature);
