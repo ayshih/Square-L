@@ -18,7 +18,7 @@ namespace Square_L
     public partial class CreateIdentityPage : PhoneApplicationPage
     {
         private PhotoCamera _photoCamera;
-        private byte[] _hash;
+        private byte[] _hashRandom, _hashImages;
         private int _times;
         private Random _random;
         private byte[] _randomBytes;
@@ -42,9 +42,9 @@ namespace Square_L
             _randomBytes = new byte[32];
 
             _SHA256 = new SHA256Managed();
-            _hash = _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks));
+            _hashImages = _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks));
             _random.NextBytes(_randomBytes);
-            _hash = Utility.Xor(_hash, _SHA256.ComputeHash(_randomBytes));
+            _hashRandom = _SHA256.ComputeHash(_randomBytes);
 
             _crypto = new CryptoRuntimeComponent();
         }
@@ -88,10 +88,12 @@ namespace Square_L
 
                     var buffer = new byte[width*height];
                     _photoCamera.GetPreviewBufferY(buffer);
-                    _hash = Utility.Xor(_hash, _SHA256.ComputeHash(buffer));
-                    _hash = Utility.Xor(_hash, _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks)));
+                    var time = BitConverter.GetBytes(DateTime.Now.Ticks);
+                    Buffer.BlockCopy(time, 0, buffer, 0, time.Length);
+                    _hashImages = Utility.Xor(_hashImages, _SHA256.ComputeHash(buffer));
+
                     _random.NextBytes(_randomBytes);
-                    _hash = Utility.Xor(_hash, _SHA256.ComputeHash(_randomBytes));
+                    _hashRandom = Utility.Xor(_hashRandom, _SHA256.ComputeHash(_randomBytes));
 
                     //ConnectingText.Text = Convert.ToBase64String(_hash);
                     //Canvas.SetZIndex(Connecting, 1);
@@ -187,7 +189,11 @@ namespace Square_L
 
             var passwordHash = _SHA256.ComputeHash(scryptResult);
 
-            var identity = new Identity() { nickname = NicknameBox.Text, lastUsed = new DateTime(0), masterKey = _hash, passwordSalt = passwordSalt, passwordHash = passwordHash };
+            var masterKey = new byte[32];
+            _crypto.PBKDF2_HMACSHA256(masterKey, _hashImages, _hashRandom, 1000000);
+            masterKey = Utility.Xor(masterKey, scryptResult);
+
+            var identity = new Identity() { nickname = NicknameBox.Text, lastUsed = new DateTime(0), masterKey = masterKey, passwordSalt = passwordSalt, passwordHash = passwordHash };
 
             var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
             settings.Add("identity_" + identity.nickname, identity);
