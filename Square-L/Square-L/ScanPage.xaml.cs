@@ -242,13 +242,12 @@ namespace Square_L
                 Debug.WriteLine("Private key: " + Base64Url.Encode(privateKey));
 
                 _assembleUrl.AddParameter("sqrlver", "1");
-                _assembleUrl.AddParameter("sqrlurl", _assembleUrl.Protocol);
                 _assembleUrl.AddParameter("sqrlopt", "");
                 _assembleUrl.AddParameter("sqrlkey", Base64Url.Encode(publicKey));
 
-                var challenge = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.Buffer);
+                var challenge = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.Protocol + "://" + _assembleUrl.Buffer);
                 var query = (_assembleUrl.Protocol == "sqrl" ? "https://" : "http://") + _assembleUrl.Buffer;
-                Debug.WriteLine("Challenge: " + _assembleUrl.Buffer);
+                Debug.WriteLine("Challenge: " + System.Text.Encoding.UTF8.GetString(challenge, 0, challenge.Length));
 
                 var signature = _crypto.CreateSignature(challenge, publicKey, privateKey);
                 Debug.WriteLine("Signature: " + Base64Url.Encode(signature));
