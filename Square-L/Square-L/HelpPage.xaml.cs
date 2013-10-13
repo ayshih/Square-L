@@ -55,8 +55,6 @@ namespace Square_L
             var passwordSalt = new byte[8];
             _random.NextBytes(passwordSalt);
 
-            var scryptResult = new byte[32];
-
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -68,7 +66,7 @@ namespace Square_L
                 foreach (var r in list_r)
                     foreach (var p in list_p)
                     {
-                        _crypto.SCrypt(scryptResult, password, passwordSalt, log2_N, r, p);
+                        var scryptResult = _crypto.SCrypt(password, passwordSalt, log2_N, r, p);
                         var output = "{2^" + log2_N + "," + r + "," + p + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         LongText += output + "\n";
                         Debug.WriteLine(output);

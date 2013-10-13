@@ -2,37 +2,27 @@
 
 namespace Crypto
 {
-    public ref class CryptoRuntimeComponent sealed
-    {
-    public:
-        CryptoRuntimeComponent();
+	public ref class CryptoRuntimeComponent sealed
+	{
+	public:
+		CryptoRuntimeComponent();
 
-		// The following arrays must be allocated with these sizes
-		// public_key is 32 bytes
-		// private_key is 64 bytes
-		// seed is 32 bytes
-		// signature is 64 bytes
-		void CreateKeyPair(Platform::WriteOnlyArray<unsigned char>^ public_key,
-			Platform::WriteOnlyArray<unsigned char>^ private_key,
+		void CreateKeyPair(Platform::Array<unsigned char>^* publicKey,
+			Platform::Array<unsigned char>^* privateKey,
 			const Platform::Array<unsigned char>^ seed);
-		void CreateSignature(Platform::WriteOnlyArray<unsigned char>^ signature,
-			const Platform::Array<unsigned char>^ message,
-			const Platform::Array<unsigned char>^ public_key,
-			const Platform::Array<unsigned char>^ private_key);
+		Platform::Array<unsigned char>^ CreateSignature(const Platform::Array<unsigned char>^ message,
+			const Platform::Array<unsigned char>^ publicKey,
+			const Platform::Array<unsigned char>^ privateKey);
 		bool VerifySignature(const Platform::Array<unsigned char>^ signature,
 			const Platform::Array<unsigned char>^ message,
 			const Platform::Array<unsigned char>^ public_key);
 
-		// output must be an allocated byte[32] array
-		void SCrypt(Platform::WriteOnlyArray<unsigned char>^ output,
-			const Platform::Array<unsigned char>^ password,
+		Platform::Array<unsigned char>^ SCrypt(const Platform::Array<unsigned char>^ password,
 			const Platform::Array<unsigned char>^ salt,
 			int log2_N, int r, int p);
 
-		// output must be an allocated byte[32] array
-		void PBKDF2_HMACSHA256(Platform::WriteOnlyArray<unsigned char>^ output,
-			const Platform::Array<unsigned char>^ password,
+		Platform::Array<unsigned char>^ PBKDF2_HMACSHA256(const Platform::Array<unsigned char>^ password,
 			const Platform::Array<unsigned char>^ salt,
 			int iterations);
-    };
+	};
 }

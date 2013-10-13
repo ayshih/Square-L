@@ -15,36 +15,46 @@ CryptoRuntimeComponent::CryptoRuntimeComponent()
 {
 }
 
-void CryptoRuntimeComponent::CreateKeyPair(Platform::WriteOnlyArray<unsigned char>^ public_key,
-										   Platform::WriteOnlyArray<unsigned char>^ private_key,
-										   const Platform::Array<unsigned char>^ seed)
+void CryptoRuntimeComponent::CreateKeyPair(Array<unsigned char>^* publicKey,
+										   Array<unsigned char>^* privateKey,
+										   const Array<unsigned char>^ seed)
 {
-	ed25519_create_keypair(public_key->Data, private_key->Data, seed->Data);
+	auto _publicKey = ref new Array<unsigned char>(32);
+	auto _privateKey = ref new Array<unsigned char>(64);
+
+	ed25519_create_keypair(_publicKey->Data, _privateKey->Data, seed->Data);
+
+	*publicKey = _publicKey;
+	*privateKey = _privateKey;
 }
 
-void CryptoRuntimeComponent::CreateSignature(Platform::WriteOnlyArray<unsigned char>^ signature,
-											 const Platform::Array<unsigned char>^ message,
-											 const Platform::Array<unsigned char>^ public_key,
-											 const Platform::Array<unsigned char>^ private_key)
+Array<unsigned char>^ CryptoRuntimeComponent::CreateSignature(const Array<unsigned char>^ message,
+															  const Array<unsigned char>^ publicKey,
+															  const Array<unsigned char>^ privateKey)
 {
-	ed25519_sign(signature->Data, message->Data, message->Length, public_key->Data, private_key->Data);
+	auto _signature = ref new Array<unsigned char>(64);
+
+	ed25519_sign(_signature->Data, message->Data, message->Length, publicKey->Data, privateKey->Data);
+
+	return _signature;
 }
 
 bool CryptoRuntimeComponent::VerifySignature(const Platform::Array<unsigned char>^ signature,
 											 const Platform::Array<unsigned char>^ message,
-											 const Platform::Array<unsigned char>^ public_key)
+											 const Platform::Array<unsigned char>^ publicKey)
 {
-	int result = ed25519_verify(signature->Data, message->Data, message->Length, public_key->Data);
+	int result = ed25519_verify(signature->Data, message->Data, message->Length, publicKey->Data);
 	return (result == 1);
 }
 
-void CryptoRuntimeComponent::SCrypt(Platform::WriteOnlyArray<unsigned char>^ output,
-									const Platform::Array<unsigned char>^ password,
-									const Platform::Array<unsigned char>^ salt,
-									int log2_N, int r, int p)
+Array<unsigned char>^ CryptoRuntimeComponent::SCrypt(const Array<unsigned char>^ password,
+													 const Array<unsigned char>^ salt,
+													 int log2_N, int r, int p)
 {
+	auto _output = ref new Array<unsigned char>(32);
+
 	errno = 0;
-	if (crypto_scrypt(password->Data, password->Length, salt->Data, salt->Length, 1 << log2_N, r, p, output->Data, 32) == -1)
+	if (crypto_scrypt(password->Data, password->Length, salt->Data, salt->Length, 1 << log2_N, r, p, _output->Data, 32) == -1)
 	{
 		switch (errno)
 		{
@@ -58,12 +68,17 @@ void CryptoRuntimeComponent::SCrypt(Platform::WriteOnlyArray<unsigned char>^ out
 			throw ref new Platform::OutOfMemoryException("Failed to allocate memory");
 		}
 	}
+
+	return _output;
 }
 
-void CryptoRuntimeComponent::PBKDF2_HMACSHA256(Platform::WriteOnlyArray<unsigned char>^ output,
-											   const Platform::Array<unsigned char>^ password,
-											   const Platform::Array<unsigned char>^ salt,
-											   int iterations)
+Array<unsigned char>^ CryptoRuntimeComponent::PBKDF2_HMACSHA256(const Array<unsigned char>^ password,
+																const Array<unsigned char>^ salt,
+																int iterations)
 {
-	PBKDF2_SHA256(password->Data, password->Length, salt->Data, salt->Length, iterations, output->Data, 32);
+	auto _output = ref new Array<unsigned char>(32);
+
+	PBKDF2_SHA256(password->Data, password->Length, salt->Data, salt->Length, iterations, _output->Data, 32);
+
+	return _output;
 }

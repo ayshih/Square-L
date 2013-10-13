@@ -184,13 +184,11 @@ namespace Square_L
             var passwordSalt = new byte[8];
             _random.NextBytes(passwordSalt);
 
-            var scryptResult = new byte[32];
-            _crypto.SCrypt(scryptResult, password, passwordSalt, 14, 8, 1);
+            var scryptResult = _crypto.SCrypt(password, passwordSalt, 14, 8, 1);
 
             var passwordHash = _SHA256.ComputeHash(scryptResult);
 
-            var masterKey = new byte[32];
-            _crypto.PBKDF2_HMACSHA256(masterKey, _hashImages, _hashRandom, 1000000);
+            var masterKey = _crypto.PBKDF2_HMACSHA256(_hashImages, _hashRandom, 1000000);
             masterKey = Utility.Xor(masterKey, scryptResult);
 
             var identity = new Identity() { nickname = NicknameBox.Text, lastUsed = new DateTime(0), masterKey = masterKey, passwordSalt = passwordSalt, passwordHash = passwordHash };

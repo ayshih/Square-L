@@ -214,10 +214,9 @@ namespace Square_L
 
             Debug.WriteLine("Password salt: " + Base64Url.Encode(((IdentityViewModel)DataContext).passwordSalt));
 
-            var scryptResult = new byte[32];
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            _crypto.SCrypt(scryptResult, password, ((IdentityViewModel)DataContext).passwordSalt, 14, 8, 1);
+            var scryptResult = _crypto.SCrypt(password, ((IdentityViewModel)DataContext).passwordSalt, 14, 8, 1);
             stopwatch.Stop();
             Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -237,9 +236,8 @@ namespace Square_L
                 var seed = _HMACSHA256.ComputeHash(DomainNameInBytes);
                 Debug.WriteLine("Seed: " + Base64Url.Encode(seed));
 
-                var publicKey = new byte[32];
-                var privateKey = new byte[64];
-                _crypto.CreateKeyPair(publicKey, privateKey, seed);
+                byte[] publicKey, privateKey;
+                _crypto.CreateKeyPair(out publicKey, out privateKey, seed);
                 Debug.WriteLine("Public key: " + Base64Url.Encode(publicKey));
                 Debug.WriteLine("Private key: " + Base64Url.Encode(privateKey));
 
@@ -252,8 +250,7 @@ namespace Square_L
                 var query = (_assembleUrl.Protocol == "sqrl" ? "https://" : "http://") + _assembleUrl.Buffer;
                 Debug.WriteLine("Challenge: " + _assembleUrl.Buffer);
 
-                var signature = new byte[64];
-                _crypto.CreateSignature(signature, challenge, publicKey, privateKey);
+                var signature = _crypto.CreateSignature(challenge, publicKey, privateKey);
                 Debug.WriteLine("Signature: " + Base64Url.Encode(signature));
 
                 var parameters = "sqrlsig=" + Base64Url.Encode(signature);
