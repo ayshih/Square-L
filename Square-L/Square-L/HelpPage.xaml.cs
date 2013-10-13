@@ -60,8 +60,8 @@ namespace Square_L
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            int[] list_log2_N = { 14, 16 };
-            int[] list_r = { 8, 16 };
+            int[] list_log2_N = { 13, 14, 15 };
+            int[] list_r = { 8 };
             int[] list_p = { 1, 4 };
 
             foreach (var log2_N in list_log2_N)
