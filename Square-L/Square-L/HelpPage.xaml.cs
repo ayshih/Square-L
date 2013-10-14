@@ -38,6 +38,17 @@ namespace Square_L
             base.OnNavigatedTo(e);
         }
 
+        private void SCryptTest_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                SystemTray.ProgressIndicator.IsVisible = true;
+                SystemTray.ProgressIndicator.Text = "Running scrypt tests";
+
+                Dispatcher.BeginInvoke(() => TestSCrypt());
+            }
+        }
+
         public void TestSCrypt()
         {
             LongText = "";
@@ -49,7 +60,12 @@ namespace Square_L
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+            _crypto.SCrypt(password, passwordSalt, 14, 8, 1);
+            stopwatch.Stop();
+            LongText += "Interactive verification:\n{2^14,8,1}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms\n\n";
+            LongText += "Import verification:\n{2^14,8,100}: ~" + (100*stopwatch.ElapsedMilliseconds/1000.0).ToString() + " s\n\n";
 
+            LongText += "Other sets of parameters:\n";
             int[] list_log2_N = { 13, 14, 15 };
             int[] list_r = { 8 };
             int[] list_p = { 1, 4 };
@@ -58,11 +74,11 @@ namespace Square_L
                 foreach (var r in list_r)
                     foreach (var p in list_p)
                     {
+                        stopwatch.Restart();
                         var scryptResult = _crypto.SCrypt(password, passwordSalt, log2_N, r, p);
                         var output = "{2^" + log2_N + "," + r + "," + p + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         LongText += output + "\n";
                         Debug.WriteLine(output);
-                        stopwatch.Restart();
                     }
 
             stopwatch.Stop();
@@ -91,13 +107,6 @@ namespace Square_L
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
-        }
-
-        private void SCryptTest_Click(object sender, RoutedEventArgs e)
-        {
-            SystemTray.ProgressIndicator.IsVisible = true;
-
-            Dispatcher.BeginInvoke(() => TestSCrypt());
         }
     }
 }

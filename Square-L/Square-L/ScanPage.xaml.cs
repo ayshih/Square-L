@@ -74,7 +74,7 @@ namespace Square_L
             }
             else
             {
-                Title.Text = "import identity";
+                PageTitle.Text = "import identity";
                 importIdentity = true;
                 _identity = new Identity() { masterKey = new byte[32], passwordSalt = new byte[8], passwordHash = new byte[32] };
             }
