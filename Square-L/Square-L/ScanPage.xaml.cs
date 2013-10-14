@@ -304,6 +304,8 @@ namespace Square_L
                     App.ViewModel.Identities.Add(new IdentityViewModel() { identity = _identity });
 
                     NavigationService.GoBack();
+
+                    return;
                 }
 
                 var DomainNameInBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
