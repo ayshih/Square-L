@@ -42,6 +42,8 @@ namespace Square_L
         {
             if (e.Key == System.Windows.Input.Key.Enter)
             {
+                Kludge.Visibility = System.Windows.Visibility.Collapsed;
+
                 SystemTray.ProgressIndicator.IsVisible = true;
                 SystemTray.ProgressIndicator.Text = "Running scrypt tests";
 
