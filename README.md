@@ -1,13 +1,15 @@
 Square-L
 ========
-A SQRL client for Windows Phone 8, currently as a proof of concept.  As of release 0.2, you can:
+A SQRL client for Windows Phone 8, currently as a proof of concept.  Release 0.4 has:
 
-* create and delete identities
-  * master key uses randomness from camera images, the clock, and the PRNG
-  * an identity called "test identity" with a hard-coded master key and password is recreated if deleted
-* scan a SQRL QR code
-* verify the identity's password and generate appropriate keys
-* optionally send the SQRL authentication query
+* authentication following the latest SQRL specification (2013-10-13)
+  * scans SQRL QR codes
+  * verifies passwords, using scrypt parameters: N=2^14, r=8, p=1
+  * sends the SQRL authentication query via GET+POST
+* identity management
+  * create, using randomness from camera images, the clock, and the PRNG
+  * export as a QR code, using scrypt parameters: N=2^14, r=8, p=100 (NB: output format has not been standardized yet)
+  * import an exported identity from the QR code
 
 See also
 --------
@@ -15,6 +17,7 @@ See also
 * SQRL protocol
   * Description: https://www.grc.com/sqrl/sqrl.htm
   * Newsgroup: https://www.grc.com/groups/sqrl
+  * Wiki: https://sqrlauth.net
 * SQRL clients
   * https://github.com/geir54/android-sqrl (Android)
   * https://github.com/TheBigS/SQRL (Java)
@@ -23,12 +26,13 @@ See also
   * https://github.com/trianglman/sqrl (PHP)
   * https://github.com/geir54/php-sqrl (PHP to external signature verification, running at http://sqrl.host56.com)
   * https://github.com/dchristensen/sqrl-net (.NET, running at https://sqrl.apphb.com/Account/Login)
-* ed25519
-  * Testing: http://ed25519.herokuapp.com
+* Useful utilities
+  * QR code generation: http://zxing.appspot.com/generator
+  * ed25519 testing: http://ed25519.herokuapp.com
 
 To build
 --------
-You will need the Windows Phone 8 SDK, and the following packages need to be downloaded through NuGet:
+You will need the Windows Phone 8 SDK, with the following packages downloaded through NuGet:
 
 * ZXing.NET (http://zxingnet.codeplex.com), for QR-code decoding
   * [Apache License 2.0](http://opensource.org/licenses/Apache-2.0)
