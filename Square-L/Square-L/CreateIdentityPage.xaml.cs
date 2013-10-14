@@ -59,6 +59,8 @@ namespace Square_L
             base.OnNavigatedTo(e);
 
             _photoCamera = new PhotoCamera();
+            SystemTray.ProgressIndicator.IsVisible = true;
+            SystemTray.ProgressIndicator.Text = "Connecting to camera";
             _photoCamera.Initialized += OnPhotoCameraInitialized;
             PreviewVideo.SetSource(_photoCamera);
        }
@@ -73,6 +75,11 @@ namespace Square_L
         private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
         {
             _cameraActive = true;
+
+            Dispatcher.BeginInvoke(() =>
+            {
+                SystemTray.ProgressIndicator.IsVisible = false;
+            });
         }
 
         private void HashBuffer()
@@ -170,6 +177,7 @@ namespace Square_L
             if (NicknameBox.Text != "")
             {
                 SystemTray.ProgressIndicator.IsVisible = true;
+                SystemTray.ProgressIndicator.Text = "Saving identity";
 
                 IdentityGrid.Visibility = System.Windows.Visibility.Collapsed;
 

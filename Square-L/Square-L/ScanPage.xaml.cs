@@ -84,6 +84,7 @@ namespace Square_L
 
             _photoCamera = new PhotoCamera();
             SystemTray.ProgressIndicator.IsVisible = true;
+            SystemTray.ProgressIndicator.Text = "Connecting to camera";
             _photoCamera.Initialized += OnPhotoCameraInitialized;
             PreviewVideo.SetSource(_photoCamera);
 
@@ -237,10 +238,11 @@ namespace Square_L
         {
             if (PasswordBox.Password != "")
             {
-                Directions.Text = "verifying password";
+                Directions.Text = "please wait" + (importIdentity ? "\n(a long time)" : "");
                 PasswordGrid.Visibility = System.Windows.Visibility.Collapsed;
 
                 SystemTray.ProgressIndicator.IsVisible = true;
+                SystemTray.ProgressIndicator.Text = "Verifying password";
 
                 Dispatcher.BeginInvoke(() => VerifyPassword());
             }

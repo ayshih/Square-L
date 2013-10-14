@@ -51,7 +51,7 @@
             </Rectangle>
             <Grid x:Name="Connecting" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Canvas.ZIndex="-1">
                 <Rectangle Fill="Black"/>
-                <TextBlock x:Name="ConnectingText" Text="Connecting to camera..." Margin="5" Style="{StaticResource PhoneTextNormalStyle}"/>
+                <TextBlock x:Name="ConnectingText" Text="No camera image" Margin="5" Style="{StaticResource PhoneTextNormalStyle}"/>
             </Grid>
 
             <StackPanel x:Name="Other" Grid.Row="1" Grid.ColumnSpan="2" >
