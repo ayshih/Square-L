@@ -105,7 +105,7 @@ namespace Square_L
                 Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
                 var newPasswordHash = _SHA256.ComputeHash(newScryptResult);
-                Debug.WriteLine("Password hash for export: " + Base64Url.Encode(newPasswordSalt));
+                Debug.WriteLine("Password hash for export: " + Base64Url.Encode(newPasswordHash));
 
                 var newMasterKey = Utility.Xor(trueMasterKey, newScryptResult);
                 Debug.WriteLine("Master key for export: " + Base64Url.Encode(newMasterKey));

@@ -51,7 +51,7 @@
             <shell:ApplicationBarIconButton IconUri="/Assets/questionmark.png" Text="Help" Click="ApplicationBarHelp_Click"/>
             <shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem Text="create identity" Click="ApplicationBarCreateIdentity_Click"/>
-                <shell:ApplicationBarMenuItem Text="import identity"/>
+                <shell:ApplicationBarMenuItem Text="import identity" Click="ApplicationBarImportIdentity_Click"/>
             </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>

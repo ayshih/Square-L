@@ -27,8 +27,12 @@ namespace Square_L
         private AssembleUrl _assembleUrl;
 
         private bool cameraActive;
+        private bool importIdentity;
+
+        private Identity _identity;
 
         private CryptoRuntimeComponent _crypto;
+        private Random _random;
 
         public ScanPage()
         {
@@ -39,6 +43,10 @@ namespace Square_L
             _timer.Tick += (o, arg) => ScanBuffer();
 
             _crypto = new CryptoRuntimeComponent();
+            _random = new Random();
+
+            cameraActive = false;
+            importIdentity = false;
         }
 
         private void FocusCamera(object sender, EventArgs e)
@@ -62,6 +70,13 @@ namespace Square_L
             {
                 int index = int.Parse(selectedIndex);
                 DataContext = App.ViewModel.Identities[index];
+                _identity = ((IdentityViewModel)DataContext).identity;
+            }
+            else
+            {
+                Title.Text = "import identity";
+                importIdentity = true;
+                _identity = new Identity() { masterKey = new byte[32], passwordSalt = new byte[8], passwordHash = new byte[32] };
             }
 
             SetLayout(((PhoneApplicationFrame)App.Current.RootVisual).Orientation);
@@ -73,8 +88,6 @@ namespace Square_L
             PreviewVideo.SetSource(_photoCamera);
 
             CameraButtons.ShutterKeyHalfPressed += FocusCamera;
-
-            Debug.WriteLine("Stored master key: " + Base64Url.Encode(((IdentityViewModel)DataContext).masterKey));
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -114,21 +127,46 @@ namespace Square_L
 
                 if (result != null)
                 {
-                    _assembleUrl = new AssembleUrl(result.Text);
-                    if (_assembleUrl.ValidSQRL())
+                    if (importIdentity)
                     {
-                        StopCamera();
+                        if (!ParseIdentity(result.Text)) return;
+
+                        ConnectingText.Text = "Identity found";
+                    }
+                    else
+                    {
+                        _assembleUrl = new AssembleUrl(result.Text);
+                        if (!_assembleUrl.ValidSQRL()) return;
 
                         ConnectingText.Text = _assembleUrl.DomainName;
-                        Canvas.SetZIndex(Connecting, 1);
-
-                        Directions.Text = "enter password";
-
-                        PasswordGrid.Visibility = System.Windows.Visibility.Visible;
                     }
+
+                    StopCamera();
+                    Canvas.SetZIndex(Connecting, 1);
+
+                    Directions.Text = "enter password";
+
+                    PasswordGrid.Visibility = System.Windows.Visibility.Visible;
                 }
             }
             catch { }
+        }
+
+        private bool ParseIdentity(string input)
+        {
+            var bytes = Base64Url.Decode(input);
+
+            if ((bytes.Length != 78) || (bytes[0] != 1) || (bytes[33] != 1)) return false;
+
+            Buffer.BlockCopy(bytes, 1, _identity.masterKey, 0, 32);
+            Buffer.BlockCopy(bytes, 34, _identity.passwordSalt, 0, 8);
+            Buffer.BlockCopy(bytes, 42, _identity.passwordHash, 0, 32);
+
+            Debug.WriteLine("Master key: " + Base64Url.Encode(_identity.masterKey));
+            Debug.WriteLine("Password salt: " + Base64Url.Encode(_identity.passwordSalt));
+            Debug.WriteLine("Password hash: " + Base64Url.Encode(_identity.passwordHash));
+
+            return true;
         }
 
         /// <summary>
@@ -211,25 +249,60 @@ namespace Square_L
         private void VerifyPassword()
         {
             var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
+            var passwordSalt = _identity.passwordSalt;
+            var passwordHash = _identity.passwordHash;
+            var masterKey = _identity.masterKey;
 
-            Debug.WriteLine("Password salt: " + Base64Url.Encode(((IdentityViewModel)DataContext).passwordSalt));
+            Debug.WriteLine("Stored master key: " + Base64Url.Encode(masterKey));
+            Debug.WriteLine("Password salt: " + Base64Url.Encode(passwordSalt));
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var scryptResult = _crypto.SCrypt(password, ((IdentityViewModel)DataContext).passwordSalt, 14, 8, 1);
+            var scryptResult = _crypto.SCrypt(password, passwordSalt, 14, 8, (importIdentity ? 100 : 1));
             stopwatch.Stop();
             Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
             var _SHA256 = new SHA256Managed();
 
             var passwordCheck = _SHA256.ComputeHash(scryptResult);
-            Debug.WriteLine("Password hash: " + Base64Url.Encode(((IdentityViewModel)DataContext).passwordHash));
+            Debug.WriteLine("Password hash: " + Base64Url.Encode(passwordHash));
             Debug.WriteLine("Password check: " + Base64Url.Encode(passwordCheck));
 
-            if (Base64Url.Encode(passwordCheck).Equals(Base64Url.Encode(((IdentityViewModel)DataContext).passwordHash)))
+            if (Base64Url.Encode(passwordCheck).Equals(Base64Url.Encode(passwordHash)))
             {
-                var trueMasterKey = Utility.Xor(((IdentityViewModel)DataContext).masterKey, scryptResult);
+                var trueMasterKey = Utility.Xor(masterKey, scryptResult);
                 Debug.WriteLine("True master key: " + Base64Url.Encode(trueMasterKey));
+
+                if (importIdentity)
+                {
+                    var newPasswordSalt = new byte[8];
+                    _random.NextBytes(newPasswordSalt);
+                    Debug.WriteLine("New password salt: " + Base64Url.Encode(newPasswordSalt));
+
+                    stopwatch.Restart();
+                    var newScryptResult = _crypto.SCrypt(password, newPasswordSalt, 14, 8, 1);
+                    stopwatch.Stop();
+                    Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
+
+                    var newPasswordHash = _SHA256.ComputeHash(newScryptResult);
+                    Debug.WriteLine("New password hash: " + Base64Url.Encode(newPasswordHash));
+
+                    var newMasterKey = Utility.Xor(trueMasterKey, newScryptResult);
+                    Debug.WriteLine("Imported master key: " + Base64Url.Encode(newMasterKey));
+
+                    _identity.nickname = Base64Url.Encode(newPasswordSalt);
+                    _identity.masterKey = newMasterKey;
+                    _identity.passwordSalt = newPasswordSalt;
+                    _identity.passwordHash = newPasswordHash;
+
+                    var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
+                    settings.Add("identity_" + _identity.nickname, _identity);
+                    settings.Save();
+
+                    App.ViewModel.Identities.Add(new IdentityViewModel() { identity = _identity });
+
+                    NavigationService.GoBack();
+                }
 
                 var DomainNameInBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
                 var _HMACSHA256 = new HMACSHA256(trueMasterKey);

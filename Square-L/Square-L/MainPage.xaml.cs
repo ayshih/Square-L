@@ -103,6 +103,11 @@ namespace Square_L
             NavigationService.Navigate(new Uri("/CreateIdentityPage.xaml", UriKind.Relative));
         }
 
+        private void ApplicationBarImportIdentity_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/ScanPage.xaml", UriKind.Relative));
+        }
+
         private void ApplicationBarHelp_Click(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/HelpPage.xaml", UriKind.Relative));
