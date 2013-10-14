@@ -67,9 +67,15 @@ namespace Square_L
 
         private void ContextMenuExport_Click(object sender, RoutedEventArgs e)
         {
-            IdentityViewModel identity = (sender as MenuItem).DataContext as IdentityViewModel;
+            var identity = (sender as MenuItem).DataContext as IdentityViewModel;
+            if (identity == null) return;
 
-            MessageBox.Show("Exporting not yet implemented", identity.Nickname, MessageBoxButton.OK);
+            var index = App.ViewModel.Identities.IndexOf(identity);
+
+            NavigationService.Navigate(
+                new Uri("/ExportIdentityPage.xaml?selectedIndex="
+                    + index,
+                    UriKind.Relative));
         }
 
         private void ContextMenuDelete_Click(object sender, RoutedEventArgs e)

@@ -19,7 +19,6 @@ namespace Square_L
     public partial class HelpPage : PhoneApplicationPage, INotifyPropertyChanged
     {
         private Random _random;
-        private SHA256Managed _SHA256;
         private CryptoRuntimeComponent _crypto;
 
         public HelpPage()
@@ -37,13 +36,6 @@ namespace Square_L
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-
-            _SHA256 = new SHA256Managed();
-            var hash = _SHA256.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks));
-
-            var writer = new BarcodeWriter() { Format = BarcodeFormat.QR_CODE };
-            var qrcode = writer.Write(Base64Url.Encode(hash));
-            Image.Source = qrcode;
         }
 
         public void TestSCrypt()
