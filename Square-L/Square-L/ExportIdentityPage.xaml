@@ -43,7 +43,7 @@
                 </Grid>
                 <Grid x:Name="ImageGrid" Height="300" Width="300" Visibility="Collapsed">
                     <Image x:Name="Image" HorizontalAlignment="Center" Height="300"  VerticalAlignment="Top" Width="300"/>
-                    <TextBlock Text="QR code will appear here in approximately one minute" HorizontalAlignment="Center" VerticalAlignment="Center" Canvas.ZIndex="-1" TextWrapping="Wrap"/>
+                    <TextBlock Text="QR code will appear here" HorizontalAlignment="Center" VerticalAlignment="Center" Canvas.ZIndex="-1" TextWrapping="Wrap"/>
                 </Grid>
             </StackPanel>
         </Grid>

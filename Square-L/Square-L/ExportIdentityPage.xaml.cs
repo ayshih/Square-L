@@ -10,7 +10,6 @@ using Microsoft.Phone.Shell;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using Crypto;
-using ZXing;
 
 namespace Square_L
 {
@@ -60,6 +59,7 @@ namespace Square_L
                 ImageGrid.Visibility = System.Windows.Visibility.Visible;
 
                 SystemTray.ProgressIndicator.IsVisible = true;
+                SystemTray.ProgressIndicator.Text = "Preparing master key for export";
 
                 Dispatcher.BeginInvoke(() => ExportMasterKey());
             }
@@ -105,10 +105,10 @@ namespace Square_L
                 Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
                 var newPasswordHash = _SHA256.ComputeHash(newScryptResult);
-                Debug.WriteLine("New password hash: " + Base64Url.Encode(newPasswordSalt));
+                Debug.WriteLine("Password hash for export: " + Base64Url.Encode(newPasswordSalt));
 
                 var newMasterKey = Utility.Xor(trueMasterKey, newScryptResult);
-                Debug.WriteLine("New master key: " + Base64Url.Encode(newMasterKey));
+                Debug.WriteLine("Master key for export: " + Base64Url.Encode(newMasterKey));
 
                 // The specification for the export format has not been decided.  Here it is:
                 // byte  0: signature algorithm version
@@ -129,8 +129,8 @@ namespace Square_L
                 export[75] = 8;
                 Buffer.BlockCopy(BitConverter.GetBytes((UInt16)100), 0, export, 76, 2);
 
-                var options = new ZXing.QrCode.QrCodeEncodingOptions { Margin = 2, Width = 300, Height = 300 };
-                var writer = new BarcodeWriter() { Format = BarcodeFormat.QR_CODE, Options = options };
+                var options = new ZXing.QrCode.QrCodeEncodingOptions { Margin = 1, Width = 300, Height = 300, ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H };
+                var writer = new ZXing.BarcodeWriter() { Format = ZXing.BarcodeFormat.QR_CODE, Options = options };
                 var qrcode = writer.Write(Base64Url.Encode(export));
                 Image.Source = qrcode;
             }
