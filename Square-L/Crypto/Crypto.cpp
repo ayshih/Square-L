@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <ppltasks.h>
 
 using namespace Crypto;
 using namespace Platform;
@@ -70,6 +71,13 @@ Array<unsigned char>^ CryptoRuntimeComponent::SCrypt(const Array<unsigned char>^
 	}
 
 	return _output;
+}
+
+Windows::Foundation::IAsyncOperation<Object^>^ CryptoRuntimeComponent::SCryptAsync(const Array<unsigned char>^ password,
+																				   const Array<unsigned char>^ salt,
+																				   int log2_N, int r, int p)
+{
+	return concurrency::create_async([this, password, salt, log2_N, r, p] () -> Object^ { return SCrypt(password, salt, log2_N, r, p); });
 }
 
 Array<unsigned char>^ CryptoRuntimeComponent::PBKDF2_HMACSHA256(const Array<unsigned char>^ password,

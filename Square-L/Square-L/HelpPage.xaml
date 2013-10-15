@@ -33,8 +33,8 @@
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
-                <TextBox x:Name="Kludge" Text="Press enter to test scrypt" KeyDown="SCryptTest_KeyDown"/>
-                <TextBlock x:Name="TestOutput" Text="{Binding LongText}" Height="500" Width="300"/>
+                <Button Content="Run scrypt tests" Click="Run_Click"/>
+                <TextBlock x:Name="TestOutput" Text="{Binding LongText}" Height="530" Width="300"/>
             </StackPanel>
         </Grid>
     </Grid>

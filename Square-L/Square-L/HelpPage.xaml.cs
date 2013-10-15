@@ -38,20 +38,15 @@ namespace Square_L
             base.OnNavigatedTo(e);
         }
 
-        private void SCryptTest_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void Run_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Enter)
-            {
-                Kludge.Visibility = System.Windows.Visibility.Collapsed;
+            SystemTray.ProgressIndicator.IsVisible = true;
+            SystemTray.ProgressIndicator.Text = "Running scrypt tests";
 
-                SystemTray.ProgressIndicator.IsVisible = true;
-                SystemTray.ProgressIndicator.Text = "Running scrypt tests";
-
-                Dispatcher.BeginInvoke(() => TestSCrypt());
-            }
+            TestSCrypt();
         }
 
-        public void TestSCrypt()
+        public async void TestSCrypt()
         {
             LongText = "";
 
@@ -62,14 +57,14 @@ namespace Square_L
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            _crypto.SCrypt(password, passwordSalt, 14, 8, 1);
+            await _crypto.SCryptAsync(password, passwordSalt, 14, 8, 1);
             stopwatch.Stop();
             LongText += "Interactive verification:\n{2^14,8,1}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms\n\n";
             LongText += "Import verification:\n{2^14,8,100}: ~" + (100*stopwatch.ElapsedMilliseconds/1000.0).ToString() + " s\n\n";
 
             LongText += "Other sets of parameters:\n";
             int[] list_log2_N = { 13, 14, 15 };
-            int[] list_r = { 8 };
+            int[] list_r = { 8, 16 };
             int[] list_p = { 1, 4 };
 
             foreach (var log2_N in list_log2_N)
@@ -77,7 +72,7 @@ namespace Square_L
                     foreach (var p in list_p)
                     {
                         stopwatch.Restart();
-                        var scryptResult = _crypto.SCrypt(password, passwordSalt, log2_N, r, p);
+                        var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, log2_N, r, p);
                         var output = "{2^" + log2_N + "," + r + "," + p + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         LongText += output + "\n";
                         Debug.WriteLine(output);
