@@ -76,7 +76,6 @@ namespace Square_L
             {
                 PageTitle.Text = "import identity";
                 importIdentity = true;
-                _identity = new Identity() { masterKey = new byte[32], passwordSalt = new byte[8], passwordHash = new byte[32] };
             }
 
             SetLayout(((PhoneApplicationFrame)App.Current.RootVisual).Orientation);
@@ -159,15 +158,9 @@ namespace Square_L
 
             if ((bytes.Length != 78) || (bytes[0] != 1) || (bytes[33] != 1)) return false;
 
-            Buffer.BlockCopy(bytes, 1, _identity.masterKey, 0, 32);
-            Buffer.BlockCopy(bytes, 34, _identity.passwordSalt, 0, 8);
-            Buffer.BlockCopy(bytes, 42, _identity.passwordHash, 0, 32);
+            _identity = new Identity(bytes);
 
-            Debug.WriteLine("Master key: " + Base64Url.Encode(_identity.masterKey));
-            Debug.WriteLine("Password salt: " + Base64Url.Encode(_identity.passwordSalt));
-            Debug.WriteLine("Password hash: " + Base64Url.Encode(_identity.passwordHash));
-
-            return true;
+           return true;
         }
 
         /// <summary>
@@ -241,67 +234,26 @@ namespace Square_L
                 Directions.Text = "please wait" + (importIdentity ? "\n(a long time)" : "");
                 PasswordGrid.Visibility = System.Windows.Visibility.Collapsed;
 
-                SystemTray.ProgressIndicator.IsVisible = true;
-
-                Dispatcher.BeginInvoke(() => VerifyPassword());
+                VerifyPassword();
             }
         }
 
         private async void VerifyPassword()
         {
-            SystemTray.ProgressIndicator.Text = "Verifying password";
+            SystemTray.ProgressIndicator.IsVisible = true;
 
-            var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
-            var passwordSalt = _identity.passwordSalt;
-            var passwordHash = _identity.passwordHash;
-            var masterKey = _identity.masterKey;
-
-            Debug.WriteLine("Stored master key: " + Base64Url.Encode(masterKey));
-            Debug.WriteLine("Password salt: " + Base64Url.Encode(passwordSalt));
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var parameters = new SCryptParameters { log2_N = 14, r = 8, p = (importIdentity ? 100 : 1) };
-            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, parameters) as byte[];
-            stopwatch.Stop();
-            Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
-
-            var _SHA256 = new SHA256Managed();
-
-            var passwordCheck = _SHA256.ComputeHash(scryptResult);
-            Debug.WriteLine("Password hash: " + Base64Url.Encode(passwordHash));
-            Debug.WriteLine("Password check: " + Base64Url.Encode(passwordCheck));
-
-            if (Base64Url.Encode(passwordCheck).Equals(Base64Url.Encode(passwordHash)))
+            try
             {
-                var trueMasterKey = Utility.Xor(masterKey, scryptResult);
-                Debug.WriteLine("True master key: " + Base64Url.Encode(trueMasterKey));
+                SystemTray.ProgressIndicator.Text = "Verifying password";
+                var scryptResult = await _identity.GetSCryptResult(PasswordBox.Password);
 
                 if (importIdentity)
                 {
                     SystemTray.ProgressIndicator.Text = "Importing identity";
+                    var newParameters = new Crypto.SCryptParameters { log2_N = 14, r = 8, p = 1 };
+                    await _identity.ChangeSCryptParameters(PasswordBox.Password, newParameters, scryptResult);
 
-                    var newPasswordSalt = new byte[8];
-                    _random.NextBytes(newPasswordSalt);
-                    Debug.WriteLine("New password salt: " + Base64Url.Encode(newPasswordSalt));
-
-                    stopwatch.Restart();
-                    parameters = new SCryptParameters { log2_N = 14, r = 8, p = 1 };
-                    var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, parameters) as byte[];
-                    stopwatch.Stop();
-                    Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
-
-                    var newPasswordHash = _SHA256.ComputeHash(newScryptResult);
-                    Debug.WriteLine("New password hash: " + Base64Url.Encode(newPasswordHash));
-
-                    var newMasterKey = Utility.Xor(trueMasterKey, newScryptResult);
-                    Debug.WriteLine("Imported master key: " + Base64Url.Encode(newMasterKey));
-
-                    _identity.nickname = Base64Url.Encode(newPasswordSalt);
-                    _identity.masterKey = newMasterKey;
-                    _identity.passwordSalt = newPasswordSalt;
-                    _identity.passwordHash = newPasswordHash;
-
+                    _identity.nickname = Base64Url.Encode(_identity.passwordSalt);
                     var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
                     settings.Add("identity_" + _identity.nickname, _identity);
                     settings.Save();
@@ -313,33 +265,12 @@ namespace Square_L
                     return;
                 }
 
-                var DomainNameInBytes = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.DomainName);
-                var _HMACSHA256 = new HMACSHA256(trueMasterKey);
-                var seed = _HMACSHA256.ComputeHash(DomainNameInBytes);
-                Debug.WriteLine("Seed: " + Base64Url.Encode(seed));
-
-                byte[] publicKey, privateKey;
-                _crypto.CreateKeyPair(out publicKey, out privateKey, seed);
-                Debug.WriteLine("Public key: " + Base64Url.Encode(publicKey));
-                Debug.WriteLine("Private key: " + Base64Url.Encode(privateKey));
-
-                _assembleUrl.AddParameter("sqrlver", "1");
-                _assembleUrl.AddParameter("sqrlopt", "");
-                _assembleUrl.AddParameter("sqrlkey", Base64Url.Encode(publicKey));
-
-                var challenge = System.Text.Encoding.UTF8.GetBytes(_assembleUrl.Protocol + "://" + _assembleUrl.Buffer);
-                var query = (_assembleUrl.Protocol == "sqrl" ? "https://" : "http://") + _assembleUrl.Buffer;
-                Debug.WriteLine("Challenge: " + System.Text.Encoding.UTF8.GetString(challenge, 0, challenge.Length));
-
-                var signature = _crypto.CreateSignature(challenge, publicKey, privateKey);
-                Debug.WriteLine("Signature: " + Base64Url.Encode(signature));
-
-                var post = "sqrlsig=" + Base64Url.Encode(signature);
-                Debug.WriteLine("Parameters: " + post);
+                string query, post;
+                _identity.GetQuery(_assembleUrl, scryptResult, out query, out post);
 
                 SystemTray.ProgressIndicator.Text = "";
 
-                var selection = MessageBox.Show(query+"\n\n"+post, "Send SQRL login?", MessageBoxButton.OKCancel);
+                var selection = MessageBox.Show(query + "\n\n" + post, "Send SQRL login?", MessageBoxButton.OKCancel);
                 if (selection == MessageBoxResult.OK)
                 {
                     Directions.Text = "sending authentication";
@@ -356,12 +287,14 @@ namespace Square_L
                     NavigationService.GoBack();
                 }
             }
-            else
+            catch (Exception)
             {
                 MessageBox.Show("The password you entered does not verify", "Password error", MessageBoxButton.OK);
 
                 NavigationService.GoBack();
             }
+
+            SystemTray.ProgressIndicator.IsVisible = false;
         }
 
         private void ParseQueryResponse(object sender, UploadStringCompletedEventArgs e)

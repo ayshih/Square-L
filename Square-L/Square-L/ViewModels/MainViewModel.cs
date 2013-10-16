@@ -42,7 +42,7 @@ namespace Square_L
             var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
 
             if (!settings.Contains("identity_test identity")) {
-                var identity = new Identity() { nickname = "test identity", lastUsed = new DateTime(2013, 10, 7, 17, 47, 0), masterKey = Convert.FromBase64String("VxXA0VcczUN6nj/9bMVlCeP7ogpqhmLCK54GIFTSl1s="), passwordSalt = Convert.FromBase64String("Ze6tha++1E0="), passwordHash = Convert.FromBase64String("TlA6rTzAcCYWm8o/UF6sk3i8mU2JR/db34/6nE3HKDg=") };
+                var identity = new Identity { nickname = "test identity", lastUsed = new DateTime(2013, 10, 7, 17, 47, 0), masterKey = Convert.FromBase64String("VxXA0VcczUN6nj/9bMVlCeP7ogpqhmLCK54GIFTSl1s="), passwordSalt = Convert.FromBase64String("Ze6tha++1E0="), passwordHash = Convert.FromBase64String("TlA6rTzAcCYWm8o/UF6sk3i8mU2JR/db34/6nE3HKDg="), parameters = new Crypto.SCryptParameters { log2_N = 14, r = 8, p = 1 } };
                 settings.Add("identity_" + identity.nickname, identity);
                 settings.Save();
             }

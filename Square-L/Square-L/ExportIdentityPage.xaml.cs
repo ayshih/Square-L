@@ -7,22 +7,17 @@ using System.Windows.Controls;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
-using System.Diagnostics;
-using System.Security.Cryptography;
-using Crypto;
 
 namespace Square_L
 {
     public partial class ExportIdentityPage : PhoneApplicationPage
     {
-        private CryptoRuntimeComponent _crypto;
         private Random _random;
 
         public ExportIdentityPage()
         {
             InitializeComponent();
 
-            _crypto = new CryptoRuntimeComponent();
             _random = new Random();
         }
 
@@ -58,93 +53,35 @@ namespace Square_L
                 PasswordGrid.Visibility = System.Windows.Visibility.Collapsed;
                 ImageGrid.Visibility = System.Windows.Visibility.Visible;
 
-                SystemTray.ProgressIndicator.IsVisible = true;
-
                 ExportMasterKey();
             }
         }
 
         private async void ExportMasterKey()
         {
-            SystemTray.ProgressIndicator.Text = "Verifying password";
+            SystemTray.ProgressIndicator.IsVisible = true;
 
-            var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
-            var passwordSalt = ((IdentityViewModel)DataContext).passwordSalt;
-            var passwordHash = ((IdentityViewModel)DataContext).passwordHash;
-            var masterKey = ((IdentityViewModel)DataContext).masterKey;
+            var identity = new Identity(((IdentityViewModel)DataContext).identity);
 
-            Debug.WriteLine("Stored master key: " + Base64Url.Encode(masterKey));
-            Debug.WriteLine("Password salt: " + Base64Url.Encode(passwordSalt));
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var parameters = new SCryptParameters { log2_N = 14, r = 8, p = 1 };
-            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, parameters) as byte[];
-            stopwatch.Stop();
-            Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
-
-            var _SHA256 = new SHA256Managed();
-
-            var passwordCheck = _SHA256.ComputeHash(scryptResult);
-            Debug.WriteLine("Password hash: " + Base64Url.Encode(passwordHash));
-            Debug.WriteLine("Password check: " + Base64Url.Encode(passwordCheck));
-
-            if (Base64Url.Encode(passwordCheck).Equals(Base64Url.Encode(passwordHash)))
+            try
             {
+                SystemTray.ProgressIndicator.Text = "Verifying password";
+                var scryptResult = await identity.GetSCryptResult(PasswordBox.Password);
+
                 SystemTray.ProgressIndicator.Text = "Encrypting identity for export";
+                var newParameters = new Crypto.SCryptParameters { log2_N = 14, r = 8, p = 100 };
+                await identity.ChangeSCryptParameters(PasswordBox.Password, newParameters, scryptResult);
 
-                var trueMasterKey = Utility.Xor(masterKey, scryptResult);
-                Debug.WriteLine("True master key: " + Base64Url.Encode(trueMasterKey));
-
-                var newPasswordSalt = new byte[8];
-                _random.NextBytes(newPasswordSalt);
-
-                Debug.WriteLine("New password salt: " + Base64Url.Encode(newPasswordSalt));
-
-                stopwatch.Restart();
-                parameters.p = 100;
-                var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, parameters) as byte[];
-                stopwatch.Stop();
-                Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
-
-                var newPasswordHash = _SHA256.ComputeHash(newScryptResult);
-                Debug.WriteLine("Password hash for export: " + Base64Url.Encode(newPasswordHash));
-
-                var newMasterKey = Utility.Xor(trueMasterKey, newScryptResult);
-                Debug.WriteLine("Master key for export: " + Base64Url.Encode(newMasterKey));
-
-                // The specification for the export format has not been decided.  Here it is:
-                // byte  0: signature algorithm version
-                //       1: encrypted master key (32 bytes)
-                //      33: password algorithm version
-                //      34: password salt (8 bytes)
-                //      42: password hash (32 bytes)
-                //      74: scrypt log_2(N) parameter
-                //      75: scrypt r parameter
-                //      76: scrypt p parameter (2 bytes)
-                var export = new byte[78];
-                export[0] = 1;
-                Buffer.BlockCopy(newMasterKey, 0, export, 1, 32);
-                export[33] = 1;
-                Buffer.BlockCopy(newPasswordSalt, 0, export, 34, 8);
-                Buffer.BlockCopy(newPasswordHash, 0, export, 42, 32);
-                export[74] = 14;
-                export[75] = 8;
-                Buffer.BlockCopy(BitConverter.GetBytes((UInt16)100), 0, export, 76, 2);
-
-                var options = new ZXing.QrCode.QrCodeEncodingOptions { Margin = 1, Width = 300, Height = 300, ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H };
-                var writer = new ZXing.BarcodeWriter() { Format = ZXing.BarcodeFormat.QR_CODE, Options = options };
-                var qrcode = writer.Write(Base64Url.Encode(export));
-                Image.Source = qrcode;
-
-                SystemTray.ProgressIndicator.IsVisible = false;
+                Image.Source = identity.GetQRCode();
             }
-            else
+            catch (Exception)
             {
                 MessageBox.Show("The password you entered does not verify", "Password error", MessageBoxButton.OK);
 
                 NavigationService.GoBack();
             }
+
+            SystemTray.ProgressIndicator.IsVisible = false;
         }
     }
 }

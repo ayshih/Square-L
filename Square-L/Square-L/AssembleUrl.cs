@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Square_L
 {
-    class AssembleUrl
+    public class AssembleUrl
     {
         /// <summary>
         /// Creates an AssembleUrl object based on a SQRL url

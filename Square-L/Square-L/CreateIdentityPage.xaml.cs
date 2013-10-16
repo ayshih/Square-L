@@ -204,7 +204,7 @@ namespace Square_L
 
             masterKey = Utility.Xor(masterKey, scryptResult);
 
-            var identity = new Identity() { nickname = NicknameBox.Text, lastUsed = new DateTime(0), masterKey = masterKey, passwordSalt = passwordSalt, passwordHash = passwordHash };
+            var identity = new Identity() { nickname = NicknameBox.Text, lastUsed = new DateTime(0), masterKey = masterKey, passwordSalt = passwordSalt, passwordHash = passwordHash, parameters = parameters };
 
             var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
             settings.Add("identity_" + identity.nickname, identity);
