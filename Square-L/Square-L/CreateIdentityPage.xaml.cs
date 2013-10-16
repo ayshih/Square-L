@@ -97,6 +97,8 @@ namespace Square_L
                     _photoCamera.GetPreviewBufferY(buffer);
                     var time = BitConverter.GetBytes(DateTime.Now.Ticks);
                     Buffer.BlockCopy(time, 0, buffer, 0, time.Length);
+                    _random.NextBytes(_randomBytes);
+                    Buffer.BlockCopy(_randomBytes, 0, buffer, time.Length, _randomBytes.Length);
                     _hashImages = Utility.Xor(_hashImages, _SHA256.ComputeHash(buffer));
 
                     _random.NextBytes(_randomBytes);
@@ -177,7 +179,6 @@ namespace Square_L
             if (NicknameBox.Text != "")
             {
                 SystemTray.ProgressIndicator.IsVisible = true;
-                SystemTray.ProgressIndicator.Text = "Saving identity";
 
                 IdentityGrid.Visibility = System.Windows.Visibility.Collapsed;
 
@@ -185,18 +186,21 @@ namespace Square_L
             }
         }
 
-        private void SaveIdentity()
+        private async void SaveIdentity()
         {
+            SystemTray.ProgressIndicator.Text = "Generating identity from entropy";
+            var masterKey = await _crypto.PBKDF2_HMACSHA256_Async(_hashImages, _hashRandom, 1000000) as byte[];
+
             var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
 
             var passwordSalt = new byte[8];
             _random.NextBytes(passwordSalt);
 
-            var scryptResult = _crypto.SCrypt(password, passwordSalt, 14, 8, 1);
+            SystemTray.ProgressIndicator.Text = "Encrypting identity";
+            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, 14, 8, 1) as byte[];
 
             var passwordHash = _SHA256.ComputeHash(scryptResult);
 
-            var masterKey = _crypto.PBKDF2_HMACSHA256(_hashImages, _hashRandom, 1000000);
             masterKey = Utility.Xor(masterKey, scryptResult);
 
             var identity = new Identity() { nickname = NicknameBox.Text, lastUsed = new DateTime(0), masterKey = masterKey, passwordSalt = passwordSalt, passwordHash = passwordHash };

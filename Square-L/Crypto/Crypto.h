@@ -27,5 +27,8 @@ namespace Crypto
         Platform::Array<unsigned char>^ PBKDF2_HMACSHA256(const Platform::Array<unsigned char>^ password,
             const Platform::Array<unsigned char>^ salt,
             int iterations);
+        Windows::Foundation::IAsyncOperation<Platform::Object^>^ PBKDF2_HMACSHA256_Async(const Platform::Array<unsigned char>^ password,
+            const Platform::Array<unsigned char>^ salt,
+            int iterations);
     };
 }

@@ -90,3 +90,10 @@ Array<unsigned char>^ CryptoRuntimeComponent::PBKDF2_HMACSHA256(const Array<unsi
 
     return _output;
 }
+
+Windows::Foundation::IAsyncOperation<Object^>^ CryptoRuntimeComponent::PBKDF2_HMACSHA256_Async(const Array<unsigned char>^ password,
+                                                                const Array<unsigned char>^ salt,
+                                                                int iterations)
+{
+    return concurrency::create_async([this, password, salt, iterations] () -> Object^ { return PBKDF2_HMACSHA256(password, salt, iterations); });
+}

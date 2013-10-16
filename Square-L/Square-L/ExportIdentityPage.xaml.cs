@@ -59,14 +59,15 @@ namespace Square_L
                 ImageGrid.Visibility = System.Windows.Visibility.Visible;
 
                 SystemTray.ProgressIndicator.IsVisible = true;
-                SystemTray.ProgressIndicator.Text = "Preparing master key for export";
 
-                Dispatcher.BeginInvoke(() => ExportMasterKey());
+                ExportMasterKey();
             }
         }
 
-        private void ExportMasterKey()
+        private async void ExportMasterKey()
         {
+            SystemTray.ProgressIndicator.Text = "Verifying password";
+
             var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
             var passwordSalt = ((IdentityViewModel)DataContext).passwordSalt;
             var passwordHash = ((IdentityViewModel)DataContext).passwordHash;
@@ -77,7 +78,7 @@ namespace Square_L
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var scryptResult = _crypto.SCrypt(password, passwordSalt, 14, 8, 1);
+            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, 14, 8, 1) as byte[];
             stopwatch.Stop();
             Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -87,10 +88,10 @@ namespace Square_L
             Debug.WriteLine("Password hash: " + Base64Url.Encode(passwordHash));
             Debug.WriteLine("Password check: " + Base64Url.Encode(passwordCheck));
 
-            SystemTray.ProgressIndicator.IsVisible = false;
-
             if (Base64Url.Encode(passwordCheck).Equals(Base64Url.Encode(passwordHash)))
             {
+                SystemTray.ProgressIndicator.Text = "Encrypting identity for export";
+
                 var trueMasterKey = Utility.Xor(masterKey, scryptResult);
                 Debug.WriteLine("True master key: " + Base64Url.Encode(trueMasterKey));
 
@@ -100,7 +101,7 @@ namespace Square_L
                 Debug.WriteLine("New password salt: " + Base64Url.Encode(newPasswordSalt));
 
                 stopwatch.Restart();
-                var newScryptResult = _crypto.SCrypt(password, newPasswordSalt, 14, 8, 100);
+                var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, 14, 8, 100) as byte[];
                 stopwatch.Stop();
                 Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -133,6 +134,8 @@ namespace Square_L
                 var writer = new ZXing.BarcodeWriter() { Format = ZXing.BarcodeFormat.QR_CODE, Options = options };
                 var qrcode = writer.Write(Base64Url.Encode(export));
                 Image.Source = qrcode;
+
+                SystemTray.ProgressIndicator.IsVisible = false;
             }
             else
             {

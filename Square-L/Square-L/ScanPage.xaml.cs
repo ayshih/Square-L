@@ -242,14 +242,15 @@ namespace Square_L
                 PasswordGrid.Visibility = System.Windows.Visibility.Collapsed;
 
                 SystemTray.ProgressIndicator.IsVisible = true;
-                SystemTray.ProgressIndicator.Text = "Verifying password";
 
                 Dispatcher.BeginInvoke(() => VerifyPassword());
             }
         }
 
-        private void VerifyPassword()
+        private async void VerifyPassword()
         {
+            SystemTray.ProgressIndicator.Text = "Verifying password";
+
             var password = System.Text.Encoding.UTF8.GetBytes(PasswordBox.Password);
             var passwordSalt = _identity.passwordSalt;
             var passwordHash = _identity.passwordHash;
@@ -260,7 +261,7 @@ namespace Square_L
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var scryptResult = _crypto.SCrypt(password, passwordSalt, 14, 8, (importIdentity ? 100 : 1));
+            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, 14, 8, (importIdentity ? 100 : 1)) as byte[];
             stopwatch.Stop();
             Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -277,12 +278,14 @@ namespace Square_L
 
                 if (importIdentity)
                 {
+                    SystemTray.ProgressIndicator.Text = "Importing identity";
+
                     var newPasswordSalt = new byte[8];
                     _random.NextBytes(newPasswordSalt);
                     Debug.WriteLine("New password salt: " + Base64Url.Encode(newPasswordSalt));
 
                     stopwatch.Restart();
-                    var newScryptResult = _crypto.SCrypt(password, newPasswordSalt, 14, 8, 1);
+                    var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, 14, 8, 1) as byte[];
                     stopwatch.Stop();
                     Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -331,6 +334,8 @@ namespace Square_L
 
                 var parameters = "sqrlsig=" + Base64Url.Encode(signature);
                 Debug.WriteLine("Parameters: " + parameters);
+
+                SystemTray.ProgressIndicator.Text = "";
 
                 var selection = MessageBox.Show(query+"\n\n"+parameters, "Send SQRL login?", MessageBoxButton.OKCancel);
                 if (selection == MessageBoxResult.OK)

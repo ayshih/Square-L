@@ -41,13 +41,14 @@ namespace Square_L
         private void Run_Click(object sender, RoutedEventArgs e)
         {
             SystemTray.ProgressIndicator.IsVisible = true;
-            SystemTray.ProgressIndicator.Text = "Running scrypt tests";
 
             TestSCrypt();
         }
 
         public async void TestSCrypt()
         {
+            SystemTray.ProgressIndicator.Text = "Running scrypt test";
+
             LongText = "";
 
             var password = System.Text.Encoding.UTF8.GetBytes("password");
@@ -67,12 +68,16 @@ namespace Square_L
             int[] list_r = { 8, 16 };
             int[] list_p = { 1, 4 };
 
+            int count = 0;
+            int total = list_log2_N.Length * list_r.Length * list_p.Length;
             foreach (var log2_N in list_log2_N)
                 foreach (var r in list_r)
                     foreach (var p in list_p)
                     {
+                        SystemTray.ProgressIndicator.Text = "Running additional scrypt test " + (++count) + " of " + total;
+
                         stopwatch.Restart();
-                        var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, log2_N, r, p);
+                        await _crypto.SCryptAsync(password, passwordSalt, log2_N, r, p);
                         var output = "{2^" + log2_N + "," + r + "," + p + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         LongText += output + "\n";
                         Debug.WriteLine(output);
