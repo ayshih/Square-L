@@ -58,7 +58,8 @@ namespace Square_L
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            await _crypto.SCryptAsync(password, passwordSalt, 14, 8, 1);
+            var parameters = new SCryptParameters { log2_N = 14, r = 8, p = 1 };
+            await _crypto.SCryptAsync(password, passwordSalt, parameters);
             stopwatch.Stop();
             LongText += "Interactive verification:\n{2^14,8,1}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms\n\n";
             LongText += "Import verification:\n{2^14,8,100}: ~" + (100*stopwatch.ElapsedMilliseconds/1000.0).ToString() + " s\n\n";
@@ -76,8 +77,9 @@ namespace Square_L
                     {
                         SystemTray.ProgressIndicator.Text = "Running additional scrypt test " + (++count) + " of " + total;
 
+                        parameters = new SCryptParameters { log2_N = log2_N, r = r, p = p };
                         stopwatch.Restart();
-                        await _crypto.SCryptAsync(password, passwordSalt, log2_N, r, p);
+                        await _crypto.SCryptAsync(password, passwordSalt, parameters);
                         var output = "{2^" + log2_N + "," + r + "," + p + "}: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         LongText += output + "\n";
                         Debug.WriteLine(output);

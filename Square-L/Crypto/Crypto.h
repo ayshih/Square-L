@@ -2,6 +2,13 @@
 
 namespace Crypto
 {
+    public value struct SCryptParameters
+    {
+        int log2_N;
+        int r;
+        int p;
+    };
+
     public ref class CryptoRuntimeComponent sealed
     {
     public:
@@ -19,10 +26,10 @@ namespace Crypto
 
         Platform::Array<unsigned char>^ SCrypt(const Platform::Array<unsigned char>^ password,
             const Platform::Array<unsigned char>^ salt,
-            int log2_N, int r, int p);
+            SCryptParameters parameters);
         Windows::Foundation::IAsyncOperation<Platform::Object^>^ SCryptAsync(const Platform::Array<unsigned char>^ password,
             const Platform::Array<unsigned char>^ salt,
-            int log2_N, int r, int p);
+            SCryptParameters parameters);
 
         Platform::Array<unsigned char>^ PBKDF2_HMACSHA256(const Platform::Array<unsigned char>^ password,
             const Platform::Array<unsigned char>^ salt,

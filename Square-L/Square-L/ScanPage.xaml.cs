@@ -261,7 +261,8 @@ namespace Square_L
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, 14, 8, (importIdentity ? 100 : 1)) as byte[];
+            var parameters = new SCryptParameters { log2_N = 14, r = 8, p = (importIdentity ? 100 : 1) };
+            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, parameters) as byte[];
             stopwatch.Stop();
             Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -285,7 +286,8 @@ namespace Square_L
                     Debug.WriteLine("New password salt: " + Base64Url.Encode(newPasswordSalt));
 
                     stopwatch.Restart();
-                    var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, 14, 8, 1) as byte[];
+                    parameters = new SCryptParameters { log2_N = 14, r = 8, p = 1 };
+                    var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, parameters) as byte[];
                     stopwatch.Stop();
                     Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -332,12 +334,12 @@ namespace Square_L
                 var signature = _crypto.CreateSignature(challenge, publicKey, privateKey);
                 Debug.WriteLine("Signature: " + Base64Url.Encode(signature));
 
-                var parameters = "sqrlsig=" + Base64Url.Encode(signature);
-                Debug.WriteLine("Parameters: " + parameters);
+                var post = "sqrlsig=" + Base64Url.Encode(signature);
+                Debug.WriteLine("Parameters: " + post);
 
                 SystemTray.ProgressIndicator.Text = "";
 
-                var selection = MessageBox.Show(query+"\n\n"+parameters, "Send SQRL login?", MessageBoxButton.OKCancel);
+                var selection = MessageBox.Show(query+"\n\n"+post, "Send SQRL login?", MessageBoxButton.OKCancel);
                 if (selection == MessageBoxResult.OK)
                 {
                     Directions.Text = "sending authentication";
@@ -347,7 +349,7 @@ namespace Square_L
                     webClient.UploadStringCompleted += new UploadStringCompletedEventHandler(ParseQueryResponse);
                     webClient.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
 
-                    webClient.UploadStringAsync(new Uri(query), parameters);
+                    webClient.UploadStringAsync(new Uri(query), post);
                 }
                 else
                 {

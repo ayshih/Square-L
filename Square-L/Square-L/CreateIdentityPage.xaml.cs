@@ -197,7 +197,8 @@ namespace Square_L
             _random.NextBytes(passwordSalt);
 
             SystemTray.ProgressIndicator.Text = "Encrypting identity";
-            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, 14, 8, 1) as byte[];
+            var parameters = new SCryptParameters { log2_N = 14, r = 8, p = 1 };
+            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, parameters) as byte[];
 
             var passwordHash = _SHA256.ComputeHash(scryptResult);
 

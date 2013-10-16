@@ -50,12 +50,12 @@ bool CryptoRuntimeComponent::VerifySignature(const Platform::Array<unsigned char
 
 Array<unsigned char>^ CryptoRuntimeComponent::SCrypt(const Array<unsigned char>^ password,
                                                      const Array<unsigned char>^ salt,
-                                                     int log2_N, int r, int p)
+                                                     SCryptParameters parameters)
 {
     auto _output = ref new Array<unsigned char>(32);
 
     errno = 0;
-    if (crypto_scrypt(password->Data, password->Length, salt->Data, salt->Length, 1 << log2_N, r, p, _output->Data, 32) == -1)
+    if (crypto_scrypt(password->Data, password->Length, salt->Data, salt->Length, 1 << parameters.log2_N, parameters.r, parameters.p, _output->Data, 32) == -1)
     {
         switch (errno)
         {
@@ -75,9 +75,9 @@ Array<unsigned char>^ CryptoRuntimeComponent::SCrypt(const Array<unsigned char>^
 
 Windows::Foundation::IAsyncOperation<Object^>^ CryptoRuntimeComponent::SCryptAsync(const Array<unsigned char>^ password,
                                                                                    const Array<unsigned char>^ salt,
-                                                                                   int log2_N, int r, int p)
+                                                                                   SCryptParameters parameters)
 {
-    return concurrency::create_async([this, password, salt, log2_N, r, p] () -> Object^ { return SCrypt(password, salt, log2_N, r, p); });
+    return concurrency::create_async([this, password, salt, parameters] () -> Object^ { return SCrypt(password, salt, parameters); });
 }
 
 Array<unsigned char>^ CryptoRuntimeComponent::PBKDF2_HMACSHA256(const Array<unsigned char>^ password,

@@ -78,7 +78,8 @@ namespace Square_L
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, 14, 8, 1) as byte[];
+            var parameters = new SCryptParameters { log2_N = 14, r = 8, p = 1 };
+            var scryptResult = await _crypto.SCryptAsync(password, passwordSalt, parameters) as byte[];
             stopwatch.Stop();
             Debug.WriteLine("SCrypt of password+salt: " + Base64Url.Encode(scryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
@@ -101,7 +102,8 @@ namespace Square_L
                 Debug.WriteLine("New password salt: " + Base64Url.Encode(newPasswordSalt));
 
                 stopwatch.Restart();
-                var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, 14, 8, 100) as byte[];
+                parameters.p = 100;
+                var newScryptResult = await _crypto.SCryptAsync(password, newPasswordSalt, parameters) as byte[];
                 stopwatch.Stop();
                 Debug.WriteLine("SCrypt of password+new salt: " + Base64Url.Encode(newScryptResult) + " (" + stopwatch.ElapsedMilliseconds.ToString() + " ms)");
 
