@@ -118,6 +118,7 @@
     <Compile Include="ExportIdentityPage.xaml.cs">
       <DependentUpon>ExportIdentityPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Identity.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
