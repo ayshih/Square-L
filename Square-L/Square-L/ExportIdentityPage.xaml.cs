@@ -12,13 +12,9 @@ namespace Square_L
 {
     public partial class ExportIdentityPage : PhoneApplicationPage
     {
-        private Random _random;
-
         public ExportIdentityPage()
         {
             InitializeComponent();
-
-            _random = new Random();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

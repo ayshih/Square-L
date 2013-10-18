@@ -53,16 +53,28 @@ namespace Square_L
 
         private void ContextMenuRename_Click(object sender, RoutedEventArgs e)
         {
-            IdentityViewModel identity = (sender as MenuItem).DataContext as IdentityViewModel;
+            var identity = (sender as MenuItem).DataContext as IdentityViewModel;
+            if (identity == null) return;
 
-            MessageBox.Show("Renaming not yet implemented", identity.Nickname, MessageBoxButton.OK);
+            var index = App.ViewModel.Identities.IndexOf(identity);
+
+            NavigationService.Navigate(
+                new Uri("/PromptPage.xaml?mode=rename&selectedIndex="
+                    + index,
+                    UriKind.Relative));
         }
 
         private void ContextMenuChangePassword_Click(object sender, RoutedEventArgs e)
         {
-            IdentityViewModel identity = (sender as MenuItem).DataContext as IdentityViewModel;
+            var identity = (sender as MenuItem).DataContext as IdentityViewModel;
+            if (identity == null) return;
 
-            MessageBox.Show("Password changing not yet implemented", identity.Nickname, MessageBoxButton.OK);
+            var index = App.ViewModel.Identities.IndexOf(identity);
+
+            NavigationService.Navigate(
+                new Uri("/PromptPage.xaml?mode=password&selectedIndex="
+                    + index,
+                    UriKind.Relative));
         }
 
         private void ContextMenuExport_Click(object sender, RoutedEventArgs e)
