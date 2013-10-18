@@ -49,7 +49,7 @@ namespace Square_L
                 if (value != identity.lastUsed)
                 {
                     identity.lastUsed = value;
-                    NotifyPropertyChanged("LastUsed");
+                    NotifyPropertyChanged("LastUsedString");
                 }
             }
         }

@@ -67,7 +67,12 @@ namespace Square_L
                         RenameIdentity();
                         break;
                     case "password":
-                        if ((NewPassword1Box.Password == "") || (NewPassword1Box.Password != NewPassword2Box.Password)) return;
+                        if (NewPassword1Box.Password != NewPassword2Box.Password)
+                        {
+                            NewPassword1Box.Password = "";
+                            NewPassword2Box.Password = "";
+                        }
+                        if (NewPassword1Box.Password == "") return;
                         ChangePassword();
                         break;
                 }

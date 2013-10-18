@@ -43,6 +43,14 @@ namespace Square_L
             IdentityViewModel identity = selector.SelectedItem as IdentityViewModel;
             if (identity == null) return;
 
+            var settings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
+            settings.Remove("identity_" + identity.Nickname);
+
+            identity.LastUsed = DateTime.Now;
+
+            settings.Add("identity_" + identity.Nickname, identity.identity);
+            settings.Save();
+
             NavigationService.Navigate(
                 new Uri("/ScanPage.xaml?selectedIndex="
                     + selector.SelectedIndex,
