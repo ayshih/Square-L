@@ -32,9 +32,18 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
-                <Button Content="Run scrypt tests" Click="Run_Click"/>
-                <TextBlock x:Name="TestOutput" Text="{Binding LongText}" Height="530" Width="300"/>
+            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="456">
+                <TextBlock Style="{StaticResource PhoneTextTitle2Style}">SQRL protocol</TextBlock>
+                <TextBlock Style="{StaticResource PhoneTextTitle3Style}">Description:</TextBlock>
+                <HyperlinkButton TargetName="_blank" NavigateUri="https://www.grc.com/sqrl/sqrl.htm">https://www.grc.com/sqrl/sqrl.htm</HyperlinkButton>
+                <TextBlock Style="{StaticResource PhoneTextTitle3Style}">Wiki:</TextBlock>
+                <HyperlinkButton TargetName="_blank" NavigateUri="https://sqrlauth.net">https://sqrlauth.net</HyperlinkButton>
+                <TextBlock Style="{StaticResource PhoneTextTitle3Style}">Newsgroup:</TextBlock>
+                <HyperlinkButton TargetName="_blank" NavigateUri="https://www.grc.com/groups/sqrl">https://www.grc.com/groups/sqrl</HyperlinkButton>
+                <Button Content="Run scrypt tests" Click="Run_Click" Width="220"/>
+                <ScrollViewer Height="300">
+                    <TextBlock x:Name="TestOutput" Text="{Binding LongText}" Height="530" Width="300"/>
+                </ScrollViewer>
             </StackPanel>
         </Grid>
     </Grid>
