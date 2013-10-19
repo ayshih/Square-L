@@ -1,0 +1,10 @@
+Square-L
+Copyright 2013 Albert Y. Shih
+
+This software incorporates modified source code from the following packages:
+- scrypt 1.1.6 (http://www.tarsnap.com/scrypt.html), 2-clause BSD license
+- nightcracker's ed25519 (https://github.com/nightcracker/ed25519), public domain
+
+This software links to the following packages:
+- ZXing.NET (http://zxingnet.codeplex.com), Apache License 2.0
+- Windows Phone Toolkit (http://phone.codeplex.com), Microsoft Public License

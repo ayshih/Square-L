@@ -46,3 +46,7 @@ This app incorporates the following C code, appropriately modified:
   * [2-clause BSD license](http://opensource.org/licenses/BSD-2-Clause)
 * nightcracker's ed25519 (https://github.com/nightcracker/ed25519)
   * [public domain](http://opensource.org/faq#public-domain)
+
+License
+-------
+[Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
